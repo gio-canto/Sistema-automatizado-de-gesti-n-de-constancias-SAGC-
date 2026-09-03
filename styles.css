@@ -34,20 +34,24 @@ input {
   height: 100vh;
   overflow: hidden;
   background-color: #f7f7f7;
+
+  /*
+   * Las imágenes originales son 1980 x 969 (aprox. 2.04:1).
+   * Un panel demasiado estrecho obliga a object-fit: cover a
+   * ampliar y recortar demasiado. 60 / 40 reduce ese recorte
+   * sin dejar espacios vacíos y conserva suficiente ancho para
+   * el formulario.
+   */
+  --image-panel-width: 60%;
+  --form-panel-width: 40%;
 }
 
-/*
- * IMPORTANTE:
- * El carrusel ocupa físicamente solo la mitad izquierda.
- * Antes la imagen ocupaba todo el viewport y el formulario tapaba
- * la mitad derecha, provocando el recorte incorrecto.
- */
 .auth-container .back-image {
   position: relative;
   display: flex;
-  flex: 0 0 50%;
-  width: 50%;
-  max-width: 50%;
+  flex: 0 0 var(--image-panel-width);
+  width: var(--image-panel-width);
+  max-width: var(--image-panel-width);
   height: 100%;
   min-width: 0;
   overflow: hidden;
@@ -94,12 +98,12 @@ input {
   padding: 0;
   border: 0;
   object-fit: cover;
-  object-position: 50% 50%;
+  object-position: center center;
   transform: none;
 }
 
 /*
- * La capa frontal también se divide exactamente 50 / 50.
+ * La capa frontal respeta exactamente la misma división 60 / 40.
  */
 .auth-container .front-form {
   position: absolute;
@@ -113,16 +117,16 @@ input {
 
 .auth-container .front-form .resheno {
   display: block;
-  flex: 0 0 50%;
-  width: 50%;
+  flex: 0 0 var(--image-panel-width);
+  width: var(--image-panel-width);
   height: 100%;
   transition: all 0.5s;
 }
 
 .auth-container .front-form .form-container {
   display: flex;
-  flex: 0 0 50%;
-  width: 50%;
+  flex: 0 0 var(--form-panel-width);
+  width: var(--form-panel-width);
   height: 100%;
   align-items: center;
   justify-content: center;
@@ -133,9 +137,9 @@ input {
 }
 
 .auth-container .front-form .form-container .sub-form-container {
-  width: 85%;
+  width: 84%;
   min-width: 300px;
-  max-width: 650px;
+  max-width: 620px;
   margin: auto;
 }
 
@@ -474,6 +478,23 @@ input {
    Responsive
    ========================================================= */
 
+/* En pantallas medianas se vuelve a 55 / 45 para conservar espacio. */
+@media (max-width: 1100px) and (min-width: 769px) {
+  .auth-container {
+    --image-panel-width: 55%;
+    --form-panel-width: 45%;
+  }
+
+  .auth-container .front-form .form-container .sub-form-container {
+    width: 86%;
+    min-width: 0;
+  }
+
+  .login-title h1 {
+    font-size: 20px;
+  }
+}
+
 @media (max-width: 768px) {
   body {
     overflow: auto;
@@ -482,6 +503,8 @@ input {
   .auth-container {
     min-height: 100vh;
     height: auto;
+    --image-panel-width: 0%;
+    --form-panel-width: 100%;
   }
 
   .auth-container .back-image {
