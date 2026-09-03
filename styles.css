@@ -6,7 +6,7 @@ html,
 body,
 #root {
   width: 100%;
-  height: 100%;
+  min-width: 320px;
   min-height: 100%;
   margin: 0;
 }
@@ -25,51 +25,36 @@ input {
 }
 
 /* =========================================================
-   LAYOUT DEL LOGIN
-   El corte imagen/blanco se fija físicamente en 50vw.
-   No depende de flex-grow ni de porcentajes heredados.
+   LAYOUT PRINCIPAL
+   Dos columnas reales 50 / 50. Sin capas superpuestas.
    ========================================================= */
 
 .auth-container {
-  position: relative;
-  width: 100vw;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  width: 100%;
   height: 100vh;
+  min-height: 100vh;
   overflow: hidden;
   background: #fff;
 }
 
-.auth-container .back-image {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 50vw;
+/* =========================================================
+   CARRUSEL DE IMÁGENES
+   ========================================================= */
+
+.back-image {
+  position: relative;
+  min-width: 0;
   height: 100vh;
   overflow: hidden;
   background: #15191e;
 }
 
-.auth-container .back-image .container-image {
+.container-image {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
   overflow: hidden;
-}
-
-.login-slide {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 1s ease;
-}
-
-.login-slide--active {
-  opacity: 1;
 }
 
 .imagen-mamalona {
@@ -83,57 +68,43 @@ input {
   border: 0;
   object-fit: cover;
   object-position: center center;
-}
-
-.auth-container .front-form {
-  position: absolute;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
+  opacity: 0;
+  transition: opacity 1s ease;
   pointer-events: none;
 }
 
-/* Conservamos esta clase porque forma parte de la estructura FESGRO,
-   pero ahora la fijamos exactamente a la mitad izquierda. */
-.auth-container .front-form .resheno {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 50vw;
-  height: 100vh;
-  pointer-events: none;
+.imagen-mamalona--active {
+  opacity: 1;
 }
 
-.auth-container .front-form .form-container {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 50vw;
-  height: 100vh;
+/* =========================================================
+   FORMULARIO
+   ========================================================= */
+
+.form-container {
   display: flex;
+  min-width: 0;
+  height: 100vh;
   align-items: center;
   justify-content: center;
   overflow-y: auto;
   padding: 25px 0;
   background: #fff;
-  pointer-events: auto;
 }
 
-.auth-container .front-form .form-container .sub-form-container {
+.sub-form-container {
   width: 84%;
   min-width: 300px;
   max-width: 650px;
   margin: auto;
 }
 
-.auth-container .front-form .form-container .logo-inicio {
+.logo-inicio {
   margin-bottom: 25px;
   text-align: center;
 }
 
-.auth-container .front-form .form-container .logo-inicio .official-logo {
+.official-logo {
   display: inline-block;
   width: 256px;
   max-width: 72%;
@@ -141,11 +112,7 @@ input {
   object-fit: contain;
 }
 
-.auth-container
-  .front-form
-  .form-container
-  .children-form
-  .login-form {
+.children-form .login-form {
   display: flex;
   width: 100%;
   flex-direction: column;
@@ -250,7 +217,7 @@ input {
 }
 
 /* =========================================================
-   BOTÓN COCYTIEG
+   BOTÓN
    ========================================================= */
 
 .btn-cocytieg {
@@ -467,7 +434,7 @@ input {
    ========================================================= */
 
 @media (max-width: 1100px) and (min-width: 769px) {
-  .auth-container .front-form .form-container .sub-form-container {
+  .sub-form-container {
     width: 86%;
     min-width: 0;
   }
@@ -484,40 +451,30 @@ input {
   }
 
   .auth-container {
-    min-height: 100vh;
+    display: block;
+    width: 100%;
     height: auto;
+    min-height: 100vh;
   }
 
-  .auth-container .back-image,
-  .auth-container .front-form .resheno {
+  .back-image {
     display: none;
   }
 
-  .auth-container .front-form {
-    position: relative;
+  .form-container {
     width: 100%;
-    min-height: 100vh;
     height: auto;
-  }
-
-  .auth-container .front-form .form-container {
-    position: relative;
-    top: auto;
-    right: auto;
-    bottom: auto;
-    width: 100%;
     min-height: 100vh;
-    height: auto;
     padding: 30px 20px;
   }
 
-  .auth-container .front-form .form-container .sub-form-container {
+  .sub-form-container {
     width: 100%;
     min-width: 0;
     max-width: 520px;
   }
 
-  .auth-container .front-form .form-container .logo-inicio .official-logo {
+  .official-logo {
     max-width: 80%;
   }
 
