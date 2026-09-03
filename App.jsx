@@ -3,8 +3,7 @@ import { useEffect, useState } from 'react';
 const DEMO_USER = 'demo';
 const DEMO_PASSWORD = 'demo';
 
-const OFFICIAL_LOGO =
-  'https://www.fesgro.cocytieg.gob.mx/images/logo_horizontal_w_256.png';
+const OFFICIAL_LOGO = 'https://www.fesgro.cocytieg.gob.mx/images/logo_horizontal_w_256.png';
 
 const LOGIN_IMAGES = [
   'https://firebasestorage.googleapis.com/v0/b/fesgro-cocytieg.appspot.com/o/src%2FloginImage%2Fimagen1.jpg?alt=media',
@@ -163,117 +162,120 @@ export default function App() {
 
   return (
     <main className="auth-container">
-      <section className="back-image" aria-hidden="true">
+      <div className="back-image" aria-hidden="true">
         <div className="container-image">
           {LOGIN_IMAGES.map((src, index) => (
-            <img
+            <div
               key={src}
-              className={`imagen-mamalona ${
-                index === imageIndex ? 'imagen-mamalona--active' : ''
-              }`}
-              src={src}
-              alt=""
-            />
+              className={`login-slide ${index === imageIndex ? 'login-slide--active' : ''}`}
+              style={{ '--login-image': `url("${src}")` }}
+            >
+              <img className="imagen-mamalona" src={src} alt="" />
+            </div>
           ))}
         </div>
-      </section>
+      </div>
 
-      <section className="form-container" aria-label="Inicio de sesión SAGC">
-        <div className="sub-form-container">
-          <div className="logo-inicio">
-            <img
-              className="official-logo"
-              src={OFFICIAL_LOGO}
-              alt="Consejo de Ciencia, Tecnología e Innovación del Estado de Guerrero"
-            />
-          </div>
+      <div className="front-form">
+        <div className="resheno" aria-hidden="true" />
 
-          <div className="children-form">
-            <form className="login-form" onSubmit={handleSubmit} noValidate>
-              <div className="login-title">
-                <h1>
-                  Sistema automatizado de gestión de constancias
-                  <br />
-                  (SAGC)
-                </h1>
-              </div>
+        <section className="form-container" aria-label="Inicio de sesión SAGC">
+          <div className="sub-form-container">
+            <div className="logo-inicio">
+              <img
+                className="official-logo"
+                src={OFFICIAL_LOGO}
+                alt="Consejo de Ciencia, Tecnología e Innovación del Estado de Guerrero"
+              />
+            </div>
 
-              <div className="input-overcontainer">
-                <label className="label-container" htmlFor="user">
-                  Usuario
-                </label>
-                <div className="input-container">
-                  <div className="ant-input-affix-wrapper">
-                    <span className="ant-input-prefix" aria-hidden="true">
-                      <MailIcon />
-                    </span>
-                    <input
-                      id="user"
-                      className="ant-input"
-                      type="text"
-                      autoComplete="username"
-                      placeholder="Usuario"
-                      value={user}
-                      onChange={(event) => setUser(event.target.value)}
-                    />
+            <div className="children-form">
+              <form className="login-form" onSubmit={handleSubmit} noValidate>
+                <div className="login-title">
+                  <h1>
+                    Sistema automatizado de gestión de constancias
+                    <br />
+                    (SAGC)
+                  </h1>
+                </div>
+
+                <div className="input-overcontainer">
+                  <label className="label-container" htmlFor="user">
+                    Usuario
+                  </label>
+                  <div className="input-container">
+                    <div className="ant-input-affix-wrapper">
+                      <span className="ant-input-prefix" aria-hidden="true">
+                        <MailIcon />
+                      </span>
+                      <input
+                        id="user"
+                        className="ant-input"
+                        type="text"
+                        autoComplete="username"
+                        placeholder="Usuario"
+                        value={user}
+                        onChange={(event) => setUser(event.target.value)}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="input-overcontainer">
-                <label className="label-container" htmlFor="password">
-                  Contraseña
-                </label>
-                <div className="input-container">
-                  <div className="ant-input-affix-wrapper">
-                    <span className="ant-input-prefix" aria-hidden="true">
-                      <LockIcon />
-                    </span>
-                    <input
-                      id="password"
-                      className="ant-input"
-                      type={showPassword ? 'text' : 'password'}
-                      autoComplete="current-password"
-                      placeholder="Contraseña"
-                      value={password}
-                      onChange={(event) => setPassword(event.target.value)}
-                    />
-                    <button
-                      className="ant-input-suffix password-eye"
-                      type="button"
-                      onClick={() => setShowPassword((current) => !current)}
-                      aria-label="Mostrar u ocultar contraseña"
-                    >
-                      <EyeIcon />
-                    </button>
+                <div className="input-overcontainer">
+                  <label className="label-container" htmlFor="password">
+                    Contraseña
+                  </label>
+                  <div className="input-container">
+                    <div className="ant-input-affix-wrapper">
+                      <span className="ant-input-prefix" aria-hidden="true">
+                        <LockIcon />
+                      </span>
+                      <input
+                        id="password"
+                        className="ant-input"
+                        type={showPassword ? 'text' : 'password'}
+                        autoComplete="current-password"
+                        placeholder="Contraseña"
+                        value={password}
+                        onChange={(event) => setPassword(event.target.value)}
+                      />
+                      <button
+                        className="ant-input-suffix password-eye"
+                        type="button"
+                        onClick={() => setShowPassword((current) => !current)}
+                        aria-label="Mostrar u ocultar contraseña"
+                      >
+                        <EyeIcon />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <button
-                className="btn-cocytieg btn-cocytieg--primario btn-login"
-                type="submit"
-              >
-                Iniciar sesión
-              </button>
+                <button
+                  className="btn-cocytieg btn-cocytieg--primario btn-login"
+                  type="submit"
+                >
+                  Iniciar sesión
+                </button>
 
-              <div className="captcha-container">
-                <LocalCaptcha
-                  checked={captchaChecked}
-                  loading={captchaLoading}
-                  onChange={verifyCaptcha}
-                />
-              </div>
-
-              {message && (
-                <div className="auth-message" role="alert">
-                  {message}
+                <div className="captcha-container">
+                  <LocalCaptcha
+                    checked={captchaChecked}
+                    loading={captchaLoading}
+                    onChange={verifyCaptcha}
+                  />
                 </div>
-              )}
-            </form>
+
+                {message && (
+                  <div className="auth-message" role="alert">
+                    {message}
+                  </div>
+                )}
+              </form>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </main>
   );
 }
