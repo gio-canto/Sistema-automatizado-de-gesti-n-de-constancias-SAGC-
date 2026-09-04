@@ -97,7 +97,7 @@ Copia las sentencias a una pestaña de Workbench y reemplaza la contraseña de e
 El usuario de aplicación será:
 
 ```text
-sagc_app
+sagc_app@127.0.0.1
 ```
 
 y tendrá permisos de lectura/escritura sobre `sagc`, pero no permisos administrativos globales.
