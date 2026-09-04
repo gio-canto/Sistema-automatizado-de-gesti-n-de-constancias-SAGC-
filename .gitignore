@@ -1,0 +1,34 @@
+# Dependencias
+node_modules/
+server/node_modules/
+
+# Builds
+dist/
+server/dist/
+
+# Variables de entorno / secretos
+.env
+.env.*
+!.env.example
+server/.env
+server/.env.*
+!server/.env.example
+
+# Logs
+*.log
+logs/
+
+# Sistema / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Archivos generados y cargas locales
+server/uploads/*
+!server/uploads/.gitkeep
+server/tmp/*
+!server/tmp/.gitkeep
+
+# Cobertura
+coverage/
