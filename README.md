@@ -850,12 +850,21 @@ respaldos con datos personales
 - carrusel de imágenes;
 - logo institucional;
 - CAPTCHA de interfaz;
-- workflow de GitHub Pages.
+- workflow de GitHub Pages;
+- estructura inicial de API Node.js/Express;
+- conexión MySQL mediante `mysql2/promise`;
+- esquema MySQL v0.1;
+- catálogos iniciales;
+- usuario de aplicación MySQL documentado;
+- script de comprobación de conexión;
+- bootstrap de administrador con Argon2id;
+- guía completa para MySQL Workbench.
 
 ## Aún por desarrollar
 
-- backend;
-- base de datos;
+- endpoints funcionales completos del backend;
+- integración del login React con la API;
+- lógica de negocio sobre la base de datos;
 - autenticación real;
 - administración;
 - eventos;
@@ -1053,6 +1062,58 @@ El MVP deberá demostrar de extremo a extremo:
 
 ---
 
+## Preparación MySQL / Workbench
+
+La infraestructura inicial para MySQL ya se encuentra en el repositorio.
+
+Guía completa:
+
+**[`docs/MYSQL_WORKBENCH.md`](./docs/MYSQL_WORKBENCH.md)**
+
+Arquitectura local:
+
+```text
+React / Vite :5173
+      ↓ /api
+Node / Express :3001
+      ↓ mysql2
+MySQL :3306
+      ↕
+MySQL Workbench
+```
+
+Archivos principales:
+
+```text
+database/001_schema.sql
+database/002_seed_catalogos.sql
+database/003_create_app_user.example.sql
+database/004_smoke_test.sql
+server/.env.example
+server/src/config/db.js
+server/src/scripts/check-db.js
+server/src/scripts/bootstrap-admin.js
+```
+
+Comandos rápidos desde la raíz:
+
+```bash
+npm run server:install
+npm run db:check
+npm run server:dev
+```
+
+Para crear el primer administrador de desarrollo, después de configurar `server/.env`:
+
+```bash
+npm run db:bootstrap-admin
+```
+
+> [!IMPORTANT]
+> MySQL nunca se conecta directamente desde React. Las credenciales de base de datos pertenecen exclusivamente al backend.
+
+---
+
 # 20. Instalación del frontend actual
 
 ## Requisitos
@@ -1145,7 +1206,27 @@ Sistema-automatizado-de-gesti-n-de-constancias-SAGC-/
 │   └── workflows/
 │       └── deploy-pages.yml
 │
+├── database/
+│   ├── 001_schema.sql
+│   ├── 002_seed_catalogos.sql
+│   ├── 003_create_app_user.example.sql
+│   └── 004_smoke_test.sql
+│
+├── server/
+│   ├── .env.example
+│   ├── package.json
+│   ├── uploads/
+│   ├── tmp/
+│   └── src/
+│       ├── config/
+│       │   └── db.js
+│       ├── scripts/
+│       │   ├── check-db.js
+│       │   └── bootstrap-admin.js
+│       └── index.js
+│
 ├── docs/
+│   ├── MYSQL_WORKBENCH.md
 │   └── visual/
 │       ├── 01-arquitectura-general.svg
 │       ├── 02-flujo-emision.svg
