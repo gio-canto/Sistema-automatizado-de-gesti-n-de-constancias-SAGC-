@@ -98,6 +98,7 @@ export default function App() {
   const [captchaLoading, setCaptchaLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [authenticated, setAuthenticated] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     LOGIN_IMAGES.forEach((src) => {
@@ -123,11 +124,13 @@ export default function App() {
     }, 650);
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     setMessage('');
 
-    if (!user.trim() || !password) {
+    const normalizedUser = user.trim();
+
+    if (!normalizedUser || !password) {
       setMessage('Ingrese su usuario y contraseña.');
       return;
     }
@@ -137,14 +140,51 @@ export default function App() {
       return;
     }
 
-    if (user !== DEMO_USER || password !== DEMO_PASSWORD) {
-      setPassword('');
-      setCaptchaChecked(false);
-      setMessage('Usuario o contraseña incorrectos.');
+    // Acceso local de prototipo. Se conserva para GitHub Pages,
+    // donde no existe un servidor Node/MySQL.
+    if (
+      normalizedUser.toLowerCase() === DEMO_USER &&
+      password === DEMO_PASSWORD
+    ) {
+      setAuthenticated(true);
       return;
     }
 
-    setAuthenticated(true);
+    // Para usuarios reales, la validación ocurre en el backend.
+    // En desarrollo Vite redirige /api hacia http://localhost:3001.
+    setSubmitting(true);
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user: normalizedUser,
+          password,
+        }),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || !data?.ok) {
+        setPassword('');
+        setCaptchaChecked(false);
+        setMessage(
+          data?.error || 'Usuario o contraseña incorrectos.'
+        );
+        return;
+      }
+
+      setAuthenticated(true);
+    } catch {
+      setMessage(
+        'No fue posible contactar el backend. En GitHub Pages use el acceso de prototipo; para usuarios MySQL ejecute la API local.'
+      );
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   function logout() {
@@ -154,6 +194,7 @@ export default function App() {
     setShowPassword(false);
     setCaptchaChecked(false);
     setMessage('');
+    setSubmitting(false);
   }
 
   if (authenticated) {
@@ -254,8 +295,9 @@ export default function App() {
                 <button
                   className="btn-cocytieg btn-cocytieg--primario btn-login"
                   type="submit"
+                  disabled={submitting}
                 >
-                  Iniciar sesión
+                  {submitting ? 'Verificando...' : 'Iniciar sesión'}
                 </button>
 
                 <div className="captcha-container">
