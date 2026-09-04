@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="760" viewBox="0 0 1500 760">
+<defs><marker id="m" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#87909c"/></marker></defs>
+<rect width="1500" height="760" fill="#f7f8fa"/>
+<text x="750" y="60" text-anchor="middle" font-family="Arial,sans-serif" font-size="34" font-weight="700" fill="#202124">Modelo de datos inicial observado en la propuesta</text>
+<text x="750" y="95" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#697386">Las entidades finales deberán normalizarse y validarse durante el diseño del backend</text>
+<g font-family="Arial,sans-serif">
+<g stroke="#d6dbe2" stroke-width="2">
+<rect x="70" y="170" width="240" height="180" rx="18" fill="white"/><rect x="365" y="170" width="240" height="180" rx="18" fill="white"/><rect x="660" y="170" width="240" height="180" rx="18" fill="white"/><rect x="955" y="170" width="300" height="270" rx="18" fill="white"/><rect x="355" y="485" width="300" height="155" rx="18" fill="white"/><rect x="720" y="485" width="300" height="155" rx="18" fill="white"/>
+</g>
+<g font-size="23" font-weight="700">
+<text x="190" y="210" text-anchor="middle">usuarios</text><text x="485" y="210" text-anchor="middle">eventos</text><text x="780" y="210" text-anchor="middle">plantillas</text><text x="1105" y="210" text-anchor="middle" fill="#8a1538">constancias</text><text x="505" y="525" text-anchor="middle">contador_folios</text><text x="870" y="525" text-anchor="middle">auditoría</text>
+</g>
+<g font-size="15" fill="#53606f">
+<text x="95" y="245">id_usuario · nombre</text><text x="95" y="270">usuario · password_hash</text><text x="95" y="295">permiso · foto · activo</text><text x="95" y="320">fecha_creacion</text>
+<text x="390" y="245">id_evento · nombre</text><text x="390" y="270">fechas · lugar</text><text x="390" y="295">responsable · estado</text>
+<text x="685" y="245">id_plantilla · nombre</text><text x="685" y="270">tipo · tamaño · orientación</text><text x="685" y="295">archivo · versión · activo</text>
+<text x="980" y="245">id_constancia · id_evento</text><text x="980" y="270">id_plantilla · titular</text><text x="980" y="295">folio · <tspan font-weight="700" fill="#8a1538">token_unico</tspan></text><text x="980" y="320"><tspan font-weight="700" fill="#8a1538">cadena_validacion</tspan> · QR</text><text x="980" y="345">datos_variables · fecha_emision</text><text x="980" y="370">emitido_por · estado</text><text x="980" y="395">cancelación / reexpedición</text>
+<text x="380" y="560">serie · año · consecutivo</text><text x="380" y="585">bloqueo / transacción</text><text x="380" y="610">evitar colisiones</text>
+<text x="745" y="560">quién · qué · cuándo</text><text x="745" y="585">creación · edición · emisión</text><text x="745" y="610">cancelación · acceso admin</text>
+</g>
+<g stroke="#87909c" stroke-width="3" fill="none" marker-end="url(#m)">
+<path d="M310 260H355"/><path d="M605 260H650"/><path d="M900 260H945"/><path d="M505 485V420H1010"/><path d="M870 485V450H1130V440"/>
+</g>
+<rect x="1080" y="520" width="330" height="130" rx="18" fill="#fff0f3" stroke="#e8c0ca"/>
+<text x="1245" y="555" text-anchor="middle" font-size="18" font-weight="700" fill="#8a1538">Punto crítico</text>
+<text x="1245" y="584" text-anchor="middle" font-size="15" fill="#53606f">La metodología de folio, cadena y token</text>
+<text x="1245" y="608" text-anchor="middle" font-size="15" fill="#53606f">debe definirse antes de cerrar</text>
+<text x="1245" y="632" text-anchor="middle" font-size="15" fill="#53606f">el esquema de constancias.</text>
+</g>
+</svg>
