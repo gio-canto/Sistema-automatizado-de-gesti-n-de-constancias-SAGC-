@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="970" viewBox="0 0 1500 970">
+<rect width="1500" height="970" fill="#f3f4f6"/>
+<rect x="90" y="45" width="1080" height="850" rx="8" fill="white" stroke="#d9dce2" stroke-width="2"/>
+<text x="630" y="95" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#8a1538">EJEMPLO CONCEPTUAL DE SALIDA SAGC</text>
+<text x="630" y="135" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="#697386">Consejo de Ciencia, Tecnología e Innovación del Estado de Guerrero</text>
+<text x="630" y="192" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" letter-spacing="7" font-weight="700" fill="#555">OTORGA LA PRESENTE</text>
+<text x="630" y="265" text-anchor="middle" font-family="Arial,sans-serif" font-size="64" font-weight="800" fill="#087744">CONSTANCIA <tspan fill="#555" font-size="42">A:</tspan></text>
+<text x="630" y="330" text-anchor="middle" font-family="Arial,sans-serif" font-size="42" fill="#555">Fulano Mengano Perengano</text>
+<line x1="220" y1="360" x2="1040" y2="360" stroke="#d8bf7b" stroke-width="2"/>
+<text x="630" y="410" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="#555">Por su participación con el proyecto <tspan font-weight="700">Análisis de las Bebidas Energéticas</tspan></text>
+<text x="630" y="440" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="#555">en el área de <tspan font-weight="700">Interdisciplinaria</tspan>, modalidad <tspan font-weight="700">Ponencia</tspan>, en el XXX Foro de Estudios sobre Guerrero.</text>
+<rect x="230" y="510" width="150" height="150" fill="#fff" stroke="#8a1538" stroke-width="4"/>
+<g fill="#8a1538"><rect x="246" y="526" width="35" height="35"/><rect x="329" y="526" width="35" height="35"/><rect x="246" y="609" width="35" height="35"/><rect x="292" y="574" width="13" height="13"/><rect x="311" y="591" width="17" height="17"/><rect x="338" y="580" width="12" height="12"/><rect x="286" y="623" width="15" height="15"/></g>
+<text x="420" y="535" font-family="Arial,sans-serif" font-size="19" font-weight="700" fill="#555">Autoridad emisora: Mtro. Miguel Ángel Rendón Liborio</text>
+<text x="420" y="568" font-family="Arial,sans-serif" font-size="17" fill="#555">Director del Consejo de Ciencia, Tecnología e Innovación del Estado de Guerrero</text>
+<text x="420" y="615" font-family="Arial,sans-serif" font-size="16" fill="#555">Cadena: <tspan font-family="monospace">SAGC1|FGRO/25/1380|...|PONENCIA|...</tspan></text>
+<text x="220" y="820" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#202124">Token único: TOKEN-XXXXXXXXXXXX</text>
+<text x="220" y="852" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#202124">Folio: FGRO/25/1380</text>
+<text x="1040" y="852" text-anchor="end" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#202124">Acapulco de Juárez, Gro. · 14/11/2025</text>
+<g font-family="Arial,sans-serif">
+<rect x="1220" y="105" width="230" height="110" rx="16" fill="#eef5ff"/><text x="1335" y="143" text-anchor="middle" font-size="18" font-weight="700" fill="#1877f2">Folio</text><text x="1335" y="175" text-anchor="middle" font-size="15" fill="#53606f">Referencia visible</text><path d="M1220 160H1150V830H1050" fill="none" stroke="#1877f2" stroke-width="3"/>
+<rect x="1220" y="260" width="230" height="110" rx="16" fill="#fff0f3"/><text x="1335" y="298" text-anchor="middle" font-size="18" font-weight="700" fill="#8a1538">Token único</text><text x="1335" y="330" text-anchor="middle" font-size="15" fill="#53606f">Identificador opaco</text><path d="M1220 315H1185V805H405" fill="none" stroke="#8a1538" stroke-width="3"/>
+<rect x="1220" y="415" width="230" height="110" rx="16" fill="#fff7e6"/><text x="1335" y="453" text-anchor="middle" font-size="18" font-weight="700" fill="#a86800">Cadena</text><text x="1335" y="485" text-anchor="middle" font-size="15" fill="#53606f">Trazabilidad / integridad</text><path d="M1220 470H1120V610H900" fill="none" stroke="#a86800" stroke-width="3"/>
+<rect x="1220" y="570" width="230" height="110" rx="16" fill="#eefaf3"/><text x="1335" y="608" text-anchor="middle" font-size="18" font-weight="700" fill="#137a46">QR</text><text x="1335" y="640" text-anchor="middle" font-size="15" fill="#53606f">Abre validación pública</text><path d="M1220 625H1160V585H390" fill="none" stroke="#137a46" stroke-width="3"/>
+<rect x="1195" y="745" width="270" height="105" rx="16" fill="#202124"/><text x="1330" y="782" text-anchor="middle" font-size="16" font-weight="700" fill="white">NO ES PLANTILLA FINAL</text><text x="1330" y="811" text-anchor="middle" font-size="14" fill="#d5d8dc">Sirve para definir qué datos</text><text x="1330" y="833" text-anchor="middle" font-size="14" fill="#d5d8dc">debe producir SAGC.</text>
+</g>
+</svg>
