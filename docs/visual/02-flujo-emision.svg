@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="760" viewBox="0 0 1600 760">
+<defs><marker id="a" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#8a1538"/></marker></defs>
+<rect width="1600" height="760" fill="#ffffff"/>
+<text x="800" y="58" text-anchor="middle" font-family="Arial,sans-serif" font-size="34" font-weight="700" fill="#202124">Flujo real propuesto para emitir constancias</text>
+<text x="800" y="92" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#697386">Sintetizado a partir de las pantallas conceptuales del documento</text>
+<g font-family="Arial,sans-serif">
+<g fill="#f7f8fa" stroke="#d7dce2" stroke-width="2">
+<rect x="60" y="150" width="250" height="125" rx="18"/><rect x="360" y="150" width="250" height="125" rx="18"/><rect x="660" y="150" width="250" height="125" rx="18"/><rect x="960" y="150" width="250" height="125" rx="18"/><rect x="1260" y="150" width="250" height="125" rx="18"/>
+<rect x="210" y="430" width="250" height="125" rx="18"/><rect x="510" y="430" width="250" height="125" rx="18"/><rect x="810" y="430" width="250" height="125" rx="18"/><rect x="1110" y="430" width="250" height="125" rx="18"/>
+</g>
+<g font-size="21" font-weight="700" fill="#202124" text-anchor="middle">
+<text x="185" y="198">1 · Tipo de</text><text x="185" y="225">documento</text>
+<text x="485" y="198">2 · Evento, textos</text><text x="485" y="225">y campos especiales</text>
+<text x="785" y="198">3 · Tamaño y</text><text x="785" y="225">orientación</text>
+<text x="1085" y="198">4 · Plantilla y</text><text x="1085" y="225">previsualización</text>
+<text x="1385" y="198">5 · Captura manual</text><text x="1385" y="225">o carga masiva</text>
+<text x="335" y="478">6 · Revisión y</text><text x="335" y="505">corrección de datos</text>
+<text x="635" y="472" fill="#8a1538">7 · Folio + cadena</text><text x="635" y="501" fill="#8a1538">+ token único + QR</text>
+<text x="935" y="478">8 · Generación y</text><text x="935" y="505">previsualización PDF</text>
+<text x="1235" y="478">9 · Descarga</text><text x="1235" y="505">individual / ZIP</text>
+</g>
+<g font-size="15" fill="#697386" text-anchor="middle">
+<text x="185" y="252">Constancia · diploma · etc.</text><text x="485" y="252">Markdown y variables</text><text x="785" y="252">Carta / personalizado</text><text x="1085" y="252">Base o reutilizable</text><text x="1385" y="252">Importación estructurada</text>
+<text x="335" y="532">Antes de emitir</text><text x="635" y="532">Metodología pendiente</text><text x="935" y="532">Documento por persona</text><text x="1235" y="532">Cierre controlado</text>
+</g>
+<g stroke="#8a1538" stroke-width="4" fill="none" marker-end="url(#a)">
+<path d="M310 212H350"/><path d="M610 212H650"/><path d="M910 212H950"/><path d="M1210 212H1250"/>
+<path d="M1385 275V355H335V420"/><path d="M460 492H500"/><path d="M760 492H800"/><path d="M1060 492H1100"/>
+</g>
+<rect x="335" y="620" width="930" height="75" rx="18" fill="#eefaf3" stroke="#b8e4c9"/>
+<text x="800" y="650" text-anchor="middle" font-size="19" font-family="Arial,sans-serif" font-weight="700" fill="#137a46">Después de emitir: el registro permanece en la base de datos y el QR abre el validador público</text>
+<text x="800" y="678" text-anchor="middle" font-size="16" font-family="Arial,sans-serif" fill="#53606f">La emisión no termina en el PDF: debe existir trazabilidad, estado y posibilidad de validación.</text>
+</g>
+</svg>
