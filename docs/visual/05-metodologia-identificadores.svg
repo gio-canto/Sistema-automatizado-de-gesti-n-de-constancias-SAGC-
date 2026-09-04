@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="840" viewBox="0 0 1600 840">
+<defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#8a1538"/></marker></defs>
+<rect width="1600" height="840" fill="#ffffff"/>
+<text x="800" y="58" text-anchor="middle" font-family="Arial,sans-serif" font-size="34" font-weight="700" fill="#202124">Metodología pendiente: cadena de validación + token único</text>
+<text x="800" y="94" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#697386">Debe documentarse y aprobarse antes de implementar el motor definitivo de emisión</text>
+<g font-family="Arial,sans-serif">
+<g fill="#f7f8fa" stroke="#d7dce2" stroke-width="2">
+<rect x="65" y="155" width="300" height="150" rx="18"/><rect x="455" y="155" width="300" height="150" rx="18"/><rect x="845" y="155" width="300" height="150" rx="18"/><rect x="1235" y="155" width="300" height="150" rx="18"/>
+<rect x="260" y="410" width="300" height="150" rx="18"/><rect x="650" y="410" width="300" height="150" rx="18"/><rect x="1040" y="410" width="300" height="150" rx="18"/>
+</g>
+<g font-size="21" font-weight="700" fill="#202124" text-anchor="middle">
+<text x="215" y="195">1 · Definir datos</text><text x="215" y="222">inmutables</text>
+<text x="605" y="195">2 · Canonicalizar</text><text x="605" y="222">los datos</text>
+<text x="995" y="195">3 · Generar token</text><text x="995" y="222">en el servidor</text>
+<text x="1385" y="195">4 · Construir cadena</text><text x="1385" y="222">versionada</text>
+<text x="410" y="450">5 · Integridad</text><text x="410" y="477">criptográfica</text>
+<text x="800" y="450">6 · Persistir y</text><text x="800" y="477">auditar</text>
+<text x="1190" y="450">7 · QR y</text><text x="1190" y="477">validación pública</text>
+</g>
+<g font-size="15" fill="#53606f" text-anchor="middle">
+<text x="215" y="255">folio, evento, titular, fecha,</text><text x="215" y="278">tipo, modalidad, autoridad…</text>
+<text x="605" y="255">UTF-8, formatos de fecha,</text><text x="605" y="278">separadores y reglas estables</text>
+<text x="995" y="255">CSPRNG · único · no derivado</text><text x="995" y="278">solo del nombre o folio</text>
+<text x="1385" y="255">prefijo de versión + campos</text><text x="1385" y="278">en orden definido</text>
+<text x="410" y="510">Evaluar SHA-256 / HMAC / firma</text><text x="410" y="533">según nivel de garantía</text>
+<text x="800" y="510">índices UNIQUE · estado · logs</text><text x="800" y="533">cancelación y reexpedición</text>
+<text x="1190" y="510">preferir URL opaca; evitar PII</text><text x="1190" y="533">innecesaria en parámetros</text>
+</g>
+<g stroke="#8a1538" stroke-width="4" fill="none" marker-end="url(#a)">
+<path d="M365 230H445"/><path d="M755 230H835"/><path d="M1145 230H1225"/><path d="M1385 305V360H410V400"/><path d="M560 485H640"/><path d="M950 485H1030"/>
+</g>
+<rect x="170" y="645" width="1260" height="125" rx="22" fill="#202124"/>
+<text x="800" y="684" text-anchor="middle" font-size="20" font-weight="700" fill="white">Entregables obligatorios de esta metodología</text>
+<text x="800" y="716" text-anchor="middle" font-size="16" fill="#d9dde3">Especificación de formato · pseudocódigo · casos de prueba · reglas de unicidad · versionado · amenazas · política de cancelación</text>
+<text x="800" y="744" text-anchor="middle" font-size="16" fill="#d9dde3">La cadena de ejemplo del prototipo NO debe convertirse automáticamente en el estándar de producción.</text>
+</g>
+</svg>
