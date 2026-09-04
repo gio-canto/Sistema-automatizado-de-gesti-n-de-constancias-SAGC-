@@ -2,7 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import 'dotenv/config';
-import { checkDatabaseConnection } from './config/db.js';
+import argon2 from 'argon2';
+import { checkDatabaseConnection, pool } from './config/db.js';
 
 const app = express();
 const port = Number(process.env.PORT || 3001);
@@ -34,6 +35,71 @@ app.get('/api/health/db', async (_req, res) => {
     res.status(503).json({
       ok: false,
       error: 'No fue posible conectar con MySQL.',
+    });
+  }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+  const user = String(req.body?.user || '').trim();
+  const password = String(req.body?.password || '');
+
+  if (!user || !password) {
+    return res.status(400).json({
+      ok: false,
+      error: 'Ingrese su usuario y contraseña.',
+    });
+  }
+
+  try {
+    const [rows] = await pool.execute(
+      `SELECT
+         id_usuario,
+         nombre,
+         usuario,
+         password_hash,
+         permiso,
+         activo
+       FROM usuarios
+       WHERE usuario = ?
+       LIMIT 1`,
+      [user]
+    );
+
+    const account = rows[0];
+
+    if (!account || !account.activo) {
+      return res.status(401).json({
+        ok: false,
+        error: 'Usuario o contraseña incorrectos.',
+      });
+    }
+
+    const validPassword = await argon2.verify(
+      account.password_hash,
+      password
+    );
+
+    if (!validPassword) {
+      return res.status(401).json({
+        ok: false,
+        error: 'Usuario o contraseña incorrectos.',
+      });
+    }
+
+    return res.json({
+      ok: true,
+      user: {
+        id: account.id_usuario,
+        nombre: account.nombre,
+        usuario: account.usuario,
+        permiso: account.permiso,
+      },
+    });
+  } catch (error) {
+    console.error('Error durante autenticación:', error);
+    return res.status(503).json({
+      ok: false,
+      error: 'El servicio de autenticación no está disponible.',
     });
   }
 });
