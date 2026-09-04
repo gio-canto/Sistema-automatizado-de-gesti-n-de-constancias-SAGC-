@@ -10,7 +10,8 @@
     "server:install": "npm --prefix server install",
     "server:dev": "npm --prefix server run dev",
     "db:check": "npm --prefix server run db:check",
-    "db:bootstrap-admin": "npm --prefix server run db:bootstrap-admin"
+    "db:bootstrap-admin": "npm --prefix server run db:bootstrap-admin",
+    "setup:project": "node scripts/bootstrap-dev.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
