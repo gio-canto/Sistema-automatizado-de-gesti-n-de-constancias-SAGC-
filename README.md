@@ -1099,9 +1099,9 @@ main
 
 ---
 
-## 20.1 Requisitos
+## 20.1 Requisitos e instalación desde consola
 
-Instalar antes de clonar el proyecto:
+SAGC necesita:
 
 - Git;
 - Node.js 20 o superior;
@@ -1110,15 +1110,85 @@ Instalar antes de clonar el proyecto:
 - MySQL Workbench;
 - un editor como Visual Studio Code.
 
-Comprobar:
+### Windows 10/11 — PowerShell + winget
+
+Abrir **PowerShell como administrador** y ejecutar:
+
+```powershell
+winget install --exact --id Git.Git --accept-package-agreements --accept-source-agreements
+winget install --exact --id OpenJS.NodeJS.LTS --accept-package-agreements --accept-source-agreements
+winget install --exact --id Oracle.MySQL --accept-package-agreements --accept-source-agreements
+winget install --exact --id Oracle.MySQLWorkbench --accept-package-agreements --accept-source-agreements
+winget install --exact --id Microsoft.VisualStudioCode --accept-package-agreements --accept-source-agreements
+```
+
+Después cerrar y volver a abrir PowerShell para refrescar `PATH`.
+
+El repositorio también incluye un script para instalar/verificar estas herramientas:
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+.\scripts\setup-windows.ps1
+```
+
+> [!NOTE]
+> Ese script se usa después de tener una copia del repositorio. Para una computadora completamente nueva, primero instala Git con `winget`, clona el repo y después puedes ejecutar el script.
+
+### macOS — Homebrew
+
+Si Homebrew todavía no está instalado:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+Después:
+
+```bash
+brew update
+brew install git node mysql
+brew install --cask mysqlworkbench
+brew install --cask visual-studio-code
+brew services start mysql
+```
+
+### Ubuntu / Debian
+
+```bash
+sudo apt update
+sudo apt install -y git curl build-essential mysql-server
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+sudo systemctl enable --now mysql
+```
+
+Para MySQL Workbench:
+
+```bash
+sudo apt install -y mysql-workbench
+```
+
+Si la distribución no ofrece ese paquete en sus repositorios, instalar la versión oficial disponible para esa distribución y conservar MySQL Server funcionando localmente.
+
+### Verificar herramientas
 
 ```bash
 git --version
 node --version
 npm --version
+mysql --version
 ```
 
-Deberá existir también un servidor MySQL local activo en:
+En Windows también puede comprobarse:
+
+```powershell
+winget list Git.Git
+winget list OpenJS.NodeJS.LTS
+winget list Oracle.MySQL
+winget list Oracle.MySQLWorkbench
+```
+
+El servidor MySQL local deberá quedar disponible normalmente en:
 
 ```text
 127.0.0.1:3306
@@ -1163,33 +1233,43 @@ Nunca escribir un token dentro del código o README.
 
 ---
 
-## 20.3 Instalar dependencias del frontend
+## 20.3 Instalar todo el proyecto desde consola
 
-Desde la raíz:
+Una vez clonado el repositorio y con Node.js instalado, desde la raíz puede prepararse frontend + backend con un solo comando:
+
+```bash
+npm run setup:project
+```
+
+Este comando:
+
+1. verifica que Node.js sea 20 o superior;
+2. ejecuta `npm install` en la raíz;
+3. ejecuta `npm install` dentro de `server/`;
+4. crea `server/.env` desde `server/.env.example` si todavía no existe;
+5. no sobrescribe un `.env` ya existente.
+
+El script utilizado está en:
+
+```text
+scripts/bootstrap-dev.mjs
+```
+
+### Instalación manual equivalente
+
+Frontend:
 
 ```bash
 npm install
 ```
 
-Esto instala React, Vite y dependencias del frontend.
-
----
-
-## 20.4 Instalar dependencias del backend
-
-Desde la raíz:
+Backend:
 
 ```bash
 npm run server:install
 ```
 
-Equivale a instalar las dependencias dentro de:
-
-```text
-server/
-```
-
-Incluye actualmente:
+El backend instala actualmente:
 
 - Express;
 - mysql2;
@@ -1248,6 +1328,33 @@ sagc
 Guía ampliada:
 
 **[`docs/MYSQL_WORKBENCH.md`](./docs/MYSQL_WORKBENCH.md)**
+
+### Crear la base también desde consola
+
+Si el comando `mysql` está disponible en `PATH`, no es obligatorio abrir Workbench para inicializar la base.
+
+Desde la raíz del repositorio:
+
+```bash
+mysql -u root -p -e "SOURCE database/001_schema.sql;"
+mysql -u root -p -e "SOURCE database/002_seed_catalogos.sql;"
+```
+
+MySQL solicitará la contraseña de `root`.
+
+Comprobar:
+
+```bash
+mysql -u root -p -e "USE sagc; SHOW TABLES;"
+```
+
+Workbench puede seguir utilizándose para:
+
+- inspeccionar tablas;
+- ejecutar consultas;
+- visualizar relaciones;
+- generar el diagrama EER;
+- revisar datos durante desarrollo.
 
 ---
 
@@ -1721,6 +1828,10 @@ Sistema-automatizado-de-gesti-n-de-constancias-SAGC-/
 │   ├── MYSQL_WORKBENCH.md
 │   └── visual/
 │
+├── scripts/
+│   ├── bootstrap-dev.mjs
+│   └── setup-windows.ps1
+│
 ├── App.jsx
 ├── main.jsx
 ├── styles.css
@@ -1734,6 +1845,12 @@ Sistema-automatizado-de-gesti-n-de-constancias-SAGC-/
 ## 20.24 Resumen rápido para un desarrollador nuevo
 
 Después de haber preparado MySQL una primera vez:
+
+### Preparación inicial de dependencias
+
+```bash
+npm run setup:project
+```
 
 ### Terminal 1
 
