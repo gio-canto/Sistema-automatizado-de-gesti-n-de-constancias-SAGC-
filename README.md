@@ -1503,9 +1503,50 @@ El backend guardará únicamente un hash **Argon2id** en MySQL.
 
 ---
 
-## 20.10 Ejecutar el backend
+## 20.10 Lanzar SAGC completo con un solo comando
 
-Abrir una terminal en la raíz:
+La forma recomendada de iniciar el proyecto local es:
+
+```bash
+npm start
+```
+
+También puede utilizarse:
+
+```bash
+npm run start:local
+```
+
+El lanzador:
+
+1. comprueba que existan las dependencias del frontend y backend;
+2. inicia Express;
+3. inicia Vite en `127.0.0.1:5173`;
+4. fuerza el puerto 5173 para evitar cambios silenciosos a 5174/5175;
+5. espera hasta 30 segundos a que Vite responda realmente;
+6. solo cuando la página está lista abre el navegador;
+7. comprueba el endpoint de salud del backend;
+8. si MySQL/backend falla, permite que el frontend siga disponible para `demo / demo`.
+
+```text
+npm start
+   ↓
+Backend :3001
+   +
+Vite :5173
+   ↓
+esperar respuesta HTTP real
+   ↓
+abrir navegador
+```
+
+Si faltan dependencias, ejecutar primero:
+
+```bash
+npm run setup:project
+```
+
+### Arranque manual del backend
 
 ```bash
 npm run server:dev
@@ -1514,21 +1555,21 @@ npm run server:dev
 Backend:
 
 ```text
-http://localhost:3001
+http://127.0.0.1:3001
 ```
 
 Pruebas rápidas:
 
 ```text
-http://localhost:3001/api/health
-http://localhost:3001/api/health/db
+http://127.0.0.1:3001/api/health
+http://127.0.0.1:3001/api/health/db
 ```
 
 ---
 
-## 20.11 Ejecutar el frontend
+## 20.11 Arranque manual del frontend
 
-Abrir una segunda terminal:
+Si se desea ejecutar solamente Vite:
 
 ```bash
 npm run dev
@@ -1798,27 +1839,3 @@ Flujo:
 
 ```text
 push a main
-    ↓
-GitHub Actions
-    ↓
-npm install
-    ↓
-npm run build
-    ↓
-dist/
-    ↓
-GitHub Pages
-```
-
-GitHub Pages ejecuta únicamente el frontend estático.
-
-No ejecuta:
-
-- Node.js;
-- Express;
-- MySQL;
-- Workbench.
-
-Por tanto, para un despliegue completo será necesario alojar el backend y MySQL en infraestructura separada.
-
----
