@@ -108,7 +108,7 @@ export default function App() {
 
     const interval = window.setInterval(() => {
       setImageIndex((current) => (current + 1) % LOGIN_IMAGES.length);
-    }, 6500);
+    }, 10000);
 
     return () => window.clearInterval(interval);
   }, []);
