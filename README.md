@@ -1124,12 +1124,24 @@ winget install --exact --id Microsoft.VisualStudioCode --accept-package-agreemen
 
 Después cerrar y volver a abrir PowerShell para refrescar `PATH`.
 
-El repositorio también incluye un script para instalar/verificar estas herramientas:
+El repositorio también incluye un instalador inteligente:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
 .\scripts\setup-windows.ps1
 ```
+
+Antes de instalar cada herramienta, el script comprueba si ya existe:
+
+```text
+COMPROBAR
+   ↓
+¿YA ESTÁ INSTALADA?
+   ├── SÍ → OMITIR
+   └── NO → INSTALAR → VERIFICAR
+```
+
+Por tanto, volver a ejecutar el script no debería reinstalar Git, Node.js, MySQL, Workbench o VS Code si ya están detectados.
 
 > [!NOTE]
 > Ese script se usa después de tener una copia del repositorio. Para una computadora completamente nueva, primero instala Git con `winget`, clona el repo y después puedes ejecutar el script.
@@ -1244,10 +1256,23 @@ npm run setup:project
 Este comando:
 
 1. verifica que Node.js sea 20 o superior;
-2. ejecuta `npm install` en la raíz;
-3. ejecuta `npm install` dentro de `server/`;
-4. crea `server/.env` desde `server/.env.example` si todavía no existe;
-5. no sobrescribe un `.env` ya existente.
+2. comprueba si `node_modules/` del frontend ya existe;
+3. si existe, omite la instalación; si falta, ejecuta `npm install`;
+4. comprueba si `server/node_modules/` ya existe;
+5. si existe, omite la instalación; si falta, instala el backend;
+6. comprueba si `server/.env` ya existe;
+7. si existe, lo conserva; si falta, lo crea desde `server/.env.example`.
+
+```text
+Frontend instalado?  sí → omitir
+                     no → instalar
+
+Backend instalado?   sí → omitir
+                     no → instalar
+
+server/.env existe?  sí → conservar
+                     no → crear
+```
 
 El script utilizado está en:
 
@@ -1797,121 +1822,3 @@ No ejecuta:
 Por tanto, para un despliegue completo será necesario alojar el backend y MySQL en infraestructura separada.
 
 ---
-
-## 20.23 Estructura útil para desarrollo
-
-```text
-Sistema-automatizado-de-gesti-n-de-constancias-SAGC-/
-│
-├── .github/
-│   └── workflows/
-│       └── deploy-pages.yml
-│
-├── database/
-│   ├── 001_schema.sql
-│   ├── 002_seed_catalogos.sql
-│   ├── 003_create_app_user.example.sql
-│   └── 004_smoke_test.sql
-│
-├── server/
-│   ├── .env.example
-│   ├── package.json
-│   └── src/
-│       ├── config/
-│       │   └── db.js
-│       ├── scripts/
-│       │   ├── check-db.js
-│       │   └── bootstrap-admin.js
-│       └── index.js
-│
-├── docs/
-│   ├── MYSQL_WORKBENCH.md
-│   └── visual/
-│
-├── scripts/
-│   ├── bootstrap-dev.mjs
-│   └── setup-windows.ps1
-│
-├── App.jsx
-├── main.jsx
-├── styles.css
-├── vite.config.js
-├── package.json
-└── README.md
-```
-
----
-
-## 20.24 Resumen rápido para un desarrollador nuevo
-
-Después de haber preparado MySQL una primera vez:
-
-### Preparación inicial de dependencias
-
-```bash
-npm run setup:project
-```
-
-### Terminal 1
-
-```bash
-git pull origin main
-npm run server:dev
-```
-
-### Terminal 2
-
-```bash
-npm run dev
-```
-
-### Para trabajar
-
-```bash
-git checkout -b feature/mi-cambio
-```
-
-### Antes de subir
-
-```bash
-npm run build
-npm run db:check
-git status
-git add .
-git commit -m "Mi cambio"
-git push -u origin feature/mi-cambio
-```
-
-Después crear el Pull Request en GitHub.
-
----
-
-# 25. Regla de documentación del proyecto
-
-Cada nueva función deberá quedar clasificada como una de estas tres:
-
-### REQUERIMIENTO
-
-Solicitado o aprobado por el Consejo.
-
-### PROPUESTA
-
-Solución planteada por el equipo, pendiente de aprobación.
-
-### IMPLEMENTADO
-
-Función que ya existe realmente en el código.
-
-Esto evita confundir las maquetas conceptuales con funciones terminadas.
-
----
-
-<div align="center">
-
-## SAGC
-
-**Sistema Automatizado de Gestión de Constancias**
-
-Proyecto en desarrollo · requerimientos en evolución · arquitectura sujeta a validación
-
-</div>
