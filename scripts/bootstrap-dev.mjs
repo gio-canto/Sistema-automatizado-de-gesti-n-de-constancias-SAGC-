@@ -7,41 +7,52 @@ const __filename = fileURLToPath(import.meta.url);
 const root = path.resolve(path.dirname(__filename), '..');
 
 function run(command, args, cwd) {
-  console.log(`\n> ${command} ${args.join(' ')}`);
+  console.log('\n> ' + command + ' ' + args.join(' '));
   const result = spawnSync(command, args, {
     cwd,
     stdio: 'inherit',
     shell: process.platform === 'win32',
   });
+  if (result.status !== 0) process.exit(result.status ?? 1);
+}
 
-  if (result.status !== 0) {
-    process.exit(result.status ?? 1);
+function ensureDependencies(label, directory) {
+  const nodeModules = path.join(directory, 'node_modules');
+
+  if (existsSync(nodeModules)) {
+    console.log('[OK] ' + label + ': dependencias detectadas; se omite npm install.');
+    return;
   }
+
+  console.log('[--] ' + label + ': dependencias faltantes; instalando...');
+  run('npm', ['install'], directory);
+  console.log('[OK] ' + label + ': dependencias instaladas.');
 }
 
 const major = Number(process.versions.node.split('.')[0]);
-
 if (major < 20) {
-  console.error(`SAGC requiere Node.js 20 o superior. Versión actual: ${process.version}`);
+  console.error('SAGC requiere Node.js 20 o superior. Versión actual: ' + process.version);
   process.exit(1);
 }
 
-console.log('SAGC · Preparando proyecto local');
-console.log(`Node.js: ${process.version}`);
+console.log('');
+console.log('=== SAGC · Preparación inteligente del proyecto ===');
+console.log('Node.js detectado: ' + process.version);
 
-run('npm', ['install'], root);
-run('npm', ['install'], path.join(root, 'server'));
+ensureDependencies('Frontend', root);
+ensureDependencies('Backend', path.join(root, 'server'));
 
 const envExample = path.join(root, 'server', '.env.example');
 const envFile = path.join(root, 'server', '.env');
 
-if (!existsSync(envFile)) {
-  copyFileSync(envExample, envFile);
-  console.log('\nCreado server/.env desde server/.env.example.');
-  console.log('Edita DB_PASSWORD y las demás variables antes de iniciar el backend.');
+if (existsSync(envFile)) {
+  console.log('[OK] server/.env ya existe; se conserva y se omite su creación.');
 } else {
-  console.log('\nserver/.env ya existe; no se modificó.');
+  copyFileSync(envExample, envFile);
+  console.log('[OK] server/.env creado desde server/.env.example.');
+  console.log('     Edita DB_PASSWORD antes de iniciar el backend.');
 }
 
-console.log('\nPreparación de dependencias terminada.');
+console.log('');
+console.log('Preparación terminada.');
 console.log('Siguiente paso: configurar MySQL y ejecutar npm run db:check.');
