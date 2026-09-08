@@ -9,7 +9,8 @@
 --   * Este archivo es la fuente de verdad del esquema base.
 --   * Para una instalación nueva puede ejecutarse completo.
 --   * No contiene contraseñas reales ni datos personales.
---   * La metodología definitiva de cadena/token aún debe documentarse y aprobarse.
+--   * Cadena Original SAGC V1 definida en docs/METODOLOGIA_CADENA_ORIGINAL.md.
+--   * La metodología específica del token único continúa pendiente de aprobación.
 --   * Las futuras modificaciones estructurales deberán hacerse mediante migrations/.
 --
 -- Convenciones:
@@ -264,6 +265,8 @@ CREATE TABLE constancias (
 
   folio VARCHAR(100) NOT NULL,
   token_unico VARCHAR(160) NOT NULL,
+  -- Cadena Original SAGC V1:
+  -- SAGC1|FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|TOKEN_UNICO
   cadena_validacion TEXT NOT NULL,
   hash_documento CHAR(64) NULL,
   qr_destino VARCHAR(600) NOT NULL,
