@@ -37,7 +37,7 @@ Orden obligatorio:
 | Posición | Campo | Ejemplo |
 |---:|---|---|
 | 1 | versión | `SAGC1` |
-| 2 | folio | `FGRO/26/A/001380` |
+| 2 | folio | `2026-A-1380` |
 | 3 | nombre normalizado | `MARIA-JOSE-MUNOZ-LOPEZ` |
 | 4 | fecha de emisión | `2026-09-08` |
 | 5 | clave de tipo documental | `CONSTANCIA` |
@@ -46,7 +46,7 @@ Orden obligatorio:
 Ejemplo completo:
 
 ```text
-SAGC1|FGRO/26/A/001380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
+SAGC1|2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
 ```
 
 ---
@@ -145,25 +145,30 @@ En SAGC V1, esa columna contiene la Cadena Original oficial.
 
 ## 6. Canonicalización del folio
 
-Entrada conceptual:
+El folio se recibe del servicio oficial **Folio Único SAGC V1** y debe tener exactamente:
 
 ```text
- fgRo / 26 / a / 001380
+AAAA-X-XXXX
+```
+
+Ejemplo:
+
+```text
+2026-A-1380
 ```
 
 Reglas:
 
-1. convertir a texto;
-2. eliminar espacios al inicio/final;
-3. convertir a mayúsculas;
-4. eliminar espacios internos;
-5. conservar caracteres propios del formato del folio como `/`, `-`, `_` y `.`;
-6. no permitir cadena vacía.
+1. eliminar espacios accidentales;
+2. convertir la serie a mayúscula;
+3. validar `^[0-9]{4}-[A-Z]-[0-9]{4}$`;
+4. rechazar consecutivo `0000`;
+5. conservar exactamente el valor resultante.
 
-Resultado:
+La cadena original no crea ni incrementa folios. Solo consume el folio que previamente asignó el servicio definido en:
 
 ```text
-FGRO/26/A/001380
+docs/METODOLOGIA_FOLIO_UNICO.md
 ```
 
 ---
@@ -344,7 +349,7 @@ Entrada:
 
 ```json
 {
-  "folio": "FGRO/26/A/001380",
+  "folio": "2026-A-1380",
   "nombre_persona": "María José Muñoz López",
   "fecha_emision": "2026-09-08",
   "tipo_documento": "CONSTANCIA",
@@ -355,13 +360,13 @@ Entrada:
 Salida exacta:
 
 ```text
-SAGC1|FGRO/26/A/001380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
+SAGC1|2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
 ```
 
 SHA-256 de la cadena UTF-8, utilizado como vector de control técnico:
 
 ```text
-0882b0e5eab280b80cfbe2777fdff696e502af84842fd4459ba289505de4b0e6
+701f5fd806aa97854775208597b0ca3b370c9e8428e33289d1513f4ab211886e
 ```
 
 El SHA-256 anterior **no forma parte de la cadena**. Solo permite comprobar que otra implementación produjo exactamente los mismos bytes.
