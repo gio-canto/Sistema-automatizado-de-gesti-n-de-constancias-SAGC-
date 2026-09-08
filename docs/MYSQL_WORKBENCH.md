@@ -44,39 +44,26 @@ Durante la instalación de MySQL Server conserva la contraseña de la cuenta adm
 4. Pulsa **Test Connection**.
 5. Guarda la conexión.
 
-## 3. Identificar qué base tienes
+## 3. Crear la base oficial
 
-El proyecto ya cuenta con una base real creada en Workbench el **08/09/2026**.
-
-El dump original se conserva sin modificar en:
+La base oficial del proyecto está en:
 
 ```text
-database/baseline/Dump20260908.original.sql
+database/Dump20260908.sql
 ```
 
-### Caso A — instalación nueva
+Ese archivo ya fue corregido para coincidir con el diseño planeado de SAGC.
 
 En Workbench:
 
 1. **File > Open SQL Script**.
-2. Abre `database/001_schema.sql`.
-3. Ejecuta todo con el icono de rayo.
-4. Ejecuta después `database/002_seed_catalogos.sql`.
+2. Abre `database/Dump20260908.sql`.
+3. Si existe información que deba conservarse, haz primero un respaldo.
+4. Ejecuta todo con el icono de rayo.
 5. Refresca **SCHEMAS**.
+6. Ejecuta después `database/004_smoke_test.sql`.
 
-### Caso B — ya importaste o construiste Dump20260908.sql
-
-No importes `001_schema.sql` encima de esa estructura.
-
-1. Haz un respaldo.
-2. Abre:
-   `database/migrations/001_from_dump20260908.sql`
-3. Ejecuta la migración.
-4. Comprueba las tablas y los conteos que aparecen al final.
-5. Conserva por el momento las tablas `legacy_*`.
-6. Ejecuta `database/002_seed_catalogos.sql`.
-
-El esquema canónico tendrá:
+El esquema oficial tendrá:
 
 ```text
 usuarios
@@ -264,13 +251,10 @@ Los cambios futuros del esquema deberán guardarse en scripts versionados, por e
 
 ```text
 database/
-├── baseline/
-│   └── Dump20260908.original.sql
+├── Dump20260908.sql
 ├── migrations/
-│   ├── 001_from_dump20260908.sql
-│   ├── 002_...sql
-│   └── 003_...sql
-├── 001_schema.sql
+│   ├── 001_...sql
+│   └── 002_...sql
 ├── 002_seed_catalogos.sql
 ├── 003_create_app_user.example.sql
 ├── 004_smoke_test.sql
