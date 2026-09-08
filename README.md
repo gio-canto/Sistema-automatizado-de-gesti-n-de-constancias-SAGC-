@@ -432,7 +432,7 @@ La cadena:
 - permanece inmutable después de emitir;
 - no lleva prefijo de versión dentro de la cadena; el versionado se controla en documentación y código.
 
-La cadena original no constituye por sí sola una firma digital. Puede utilizarse posteriormente como entrada de SHA-256, HMAC o firma digital.
+La cadena original se utilizará como dato de trazabilidad y comparación dentro de SAGC. El proyecto no utilizará SHA-256, HMAC ni firma digital para las constancias.
 
 ---
 
@@ -496,12 +496,6 @@ Salida:
 2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|XXX-FORO-DE-ESTUDIOS-SOBRE-GUERRERO|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
 ```
 
-SHA-256 de control:
-
-```text
-e15297325430c9ed0f4df503495ff7c84f9042f90537e9251edd5d76ecd3d9b6
-```
-
 Implementación de referencia:
 
 ```text
@@ -528,17 +522,11 @@ La cadena vigente ya define **cómo consume** el token, pero todavía debe fijar
 
 El token debe continuar siendo generado en backend, único, impredecible y no editable.
 
-## 8.3 Integridad criptográfica
+## 8.3 Validación del registro
 
-La Cadena Original es la representación canónica. Si el proyecto requiere autenticidad criptográfica adicional, deberá añadirse una capa separada:
+SAGC no aplicará SHA-256, HMAC ni firma digital a las constancias.
 
-```text
-SHA-256(cadena_original)
-HMAC-SHA-256(cadena_original, secreto)
-FIRMA_DIGITAL(cadena_original, clave_privada)
-```
-
-Ese sello se almacena por separado y no modifica la cadena original.
+La validación se apoyará en el registro almacenado en MySQL, el folio, el token/QR, la cadena original y el estado de la emisión.
 
 ## 8.4 QR
 
@@ -635,7 +623,6 @@ Debe producir al menos:
 - vista previa;
 - miniatura opcional;
 - registro de emisión;
-- hash del archivo, si se adopta;
 - asociación con la constancia en base de datos.
 
 ---
@@ -994,7 +981,6 @@ respaldos con datos personales
 - [x] Metodología Cadena Original SAGC
 - [x] Implementación de referencia y vector de prueba de cadena
 - [ ] Integrar cadena al flujo real de emisión
-- [ ] Hash/HMAC/firma si se aprueba
 - [ ] QR
 - [ ] Pruebas integrales
 
@@ -1073,7 +1059,6 @@ El MVP deberá demostrar de extremo a extremo:
 - [x] versionado de cadena;
 - [x] reglas técnicas de cancelación/reexpedición de cadena;
 - [ ] metodología formal del token;
-- [ ] nivel criptográfico institucional;
 - [ ] formato definitivo de token;
 - [ ] URL institucional del QR;
 - [ ] aprobación del Consejo sobre la metodología;
