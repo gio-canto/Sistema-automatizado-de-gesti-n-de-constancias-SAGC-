@@ -9,14 +9,15 @@ const input = {
   nombre_persona: 'María José Muñoz López',
   fecha_emision: '2026-09-08',
   tipo_documento: 'CONSTANCIA',
+  evento_emision: 'EVT-000138',
   token_unico: '8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10',
 };
 
 const expected =
-  'SAGC1|2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10';
+  'SAGC2|2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|EVT-000138|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10';
 
 const expectedSha256 =
-  '701f5fd806aa97854775208597b0ca3b370c9e8428e33289d1513f4ab211886e';
+  '3b131822cff5af7789ab91eaf6aef26139c41791260170d4a130736da9c65458';
 
 const result = generarCadenaOriginal(input);
 const hash = sha256CadenaOriginal(result);
@@ -33,6 +34,15 @@ assert.throws(
   /año del folio debe coincidir/
 );
 
-console.log('Cadena Original SAGC1: OK');
+assert.throws(
+  () =>
+    generarCadenaOriginal({
+      ...input,
+      evento_emision: '',
+    }),
+  /evento_emision/
+);
+
+console.log('Cadena Original SAGC2: OK');
 console.log(result);
 console.log('SHA-256:', hash);
