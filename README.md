@@ -414,13 +414,13 @@ La metodología técnica V1 ya está definida en:
 Formato oficial:
 
 ```text
-SAGC1|FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|TOKEN_UNICO
+SAGC2|FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|EVENTO_EMISION|TOKEN_UNICO
 ```
 
 Ejemplo:
 
 ```text
-SAGC1|2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
+SAGC2|2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|EVT-000138|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
 ```
 
 La cadena:
@@ -438,7 +438,7 @@ La cadena original no constituye por sí sola una firma digital. Puede utilizars
 
 # 8. Metodología de identificadores
 
-## 8.1 Cadena Original SAGC V1 — definida
+## 8.1 Cadena Original SAGC V2 — definida
 
 La especificación normativa se encuentra en:
 
@@ -447,7 +447,7 @@ La especificación normativa se encuentra en:
 La estructura V1 contiene exactamente seis bloques:
 
 ```text
-SAGC1|FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|TOKEN_UNICO
+SAGC2|FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|EVENTO_EMISION|TOKEN_UNICO
 ```
 
 ### Datos utilizados
@@ -457,18 +457,20 @@ folio
 nombre_persona
 fecha_emision
 tipos_documento.clave
+eventos.codigo
 token_unico
 ```
 
 ### Reglas principales
 
 - UTF-8;
-- versión fija `SAGC1`;
+- versión fija `SAGC2`;
 - orden de campos invariable;
 - fecha `YYYY-MM-DD`;
 - nombre normalizado sin diacríticos, en mayúsculas y separado por guiones;
-- folio normalizado en mayúsculas y sin espacios;
+- folio validado con formato `AAAA-X-XXXX`;
 - tipo documental obtenido de su `clave`;
+- evento de emisión obtenido de `eventos.codigo`;
 - token conservado sin alterar mayúsculas/minúsculas;
 - escape de `%`, `|`, CR y LF;
 - máximo 512 bytes;
@@ -485,19 +487,20 @@ Entrada:
 María José Muñoz López
 2026-09-08
 CONSTANCIA
+EVT-000138
 8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
 ```
 
 Salida:
 
 ```text
-SAGC1|2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
+SAGC2|2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|EVT-000138|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
 ```
 
 SHA-256 de control:
 
 ```text
-701f5fd806aa97854775208597b0ca3b370c9e8428e33289d1513f4ab211886e
+3b131822cff5af7789ab91eaf6aef26139c41791260170d4a130736da9c65458
 ```
 
 Implementación de referencia:
@@ -536,7 +539,7 @@ HMAC-SHA-256(cadena_original, secreto)
 FIRMA_DIGITAL(cadena_original, clave_privada)
 ```
 
-Ese sello no debe modificar la estructura `SAGC1`.
+Ese sello no debe modificar la estructura `SAGC2`.
 
 ## 8.4 QR
 
@@ -913,7 +916,7 @@ respaldos con datos personales
 - revisión de datos;
 - contador de folios;
 - metodología definitiva del token único;
-- integración de Cadena Original SAGC1 en el flujo de emisión;
+- integración de Cadena Original SAGC2 en el flujo de emisión;
 - generación de QR;
 - motor PDF;
 - ZIP;
@@ -941,7 +944,7 @@ respaldos con datos personales
 - [ ] Definir tipos documentales
 - [ ] Definir formato XLSX
 - [ ] Definir política de plantillas
-- [x] **Definir metodología de Cadena Original SAGC V1**
+- [x] **Definir metodología de Cadena Original SAGC V2**
 - [ ] Definir metodología del token único
 - [x] Definir metodología Folio Único SAGC V1
 - [ ] Definir qué datos serán públicos
@@ -989,7 +992,7 @@ respaldos con datos personales
 - [x] Servicio transaccional de referencia del folio
 - [ ] Integrar asignación del folio en la transacción completa de emisión
 - [ ] Token
-- [x] Metodología Cadena Original SAGC1
+- [x] Metodología Cadena Original SAGC2
 - [x] Implementación de referencia y vector de prueba de cadena
 - [ ] Integrar cadena al flujo real de emisión
 - [ ] Hash/HMAC/firma si se aprueba
@@ -1066,8 +1069,8 @@ El MVP deberá demostrar de extremo a extremo:
 
 ## Cadena y token
 
-- [x] metodología técnica de Cadena Original SAGC V1;
-- [x] formato de cadena `SAGC1`;
+- [x] metodología técnica de Cadena Original SAGC V2;
+- [x] formato de cadena `SAGC2`;
 - [x] versionado de cadena;
 - [x] reglas técnicas de cancelación/reexpedición de cadena;
 - [ ] metodología formal del token;
