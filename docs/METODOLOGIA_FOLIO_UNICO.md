@@ -299,7 +299,7 @@ Y adicionalmente:
 
 ## 14. Integración con Cadena Original
 
-El folio generado se entrega sin transformación semántica a la Cadena Original SAGC V1.
+El folio generado se entrega sin transformación semántica a la Cadena Original SAGC.
 
 Ejemplo:
 
@@ -310,7 +310,7 @@ Ejemplo:
 Cadena:
 
 ```text
-SAGC1|2026-A-1380|NOMBRE_NORMALIZADO|2026-09-08|CONSTANCIA|TOKEN
+2026-A-1380|NOMBRE_NORMALIZADO|2026-09-08|CONSTANCIA|NOMBRE-EVENTO|TOKEN
 ```
 
 ---
