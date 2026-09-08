@@ -295,13 +295,7 @@ Salida exacta:
 2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|XXX-FORO-DE-ESTUDIOS-SOBRE-GUERRERO|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
 ```
 
-SHA-256 de control:
-
-```text
-e15297325430c9ed0f4df503495ff7c84f9042f90537e9251edd5d76ecd3d9b6
-```
-
-El hash es solo un vector técnico de prueba y no forma parte de la cadena.
+El vector de prueba se valida comparando directamente la cadena generada con la salida exacta esperada.
 
 ---
 
@@ -361,17 +355,30 @@ https://dominio/sagc/validacion/<token>
 
 ---
 
-## 18. Integridad criptográfica
+## 18. Modelo de validación
 
-La cadena puede ser entrada de:
+SAGC no utilizará SHA-256, HMAC ni firma digital para las constancias.
+
+La validación se realizará consultando el registro persistido en SAGC mediante el token/QR y comprobando:
+
+- existencia del registro;
+- folio;
+- titular;
+- evento;
+- fecha;
+- tipo documental;
+- cadena original;
+- estado de la constancia.
+
+Estados relevantes:
 
 ```text
-SHA-256(cadena_original)
-HMAC-SHA-256(cadena_original, secreto_servidor)
-FIRMA_DIGITAL(cadena_original, clave_privada)
+EMITIDA
+CANCELADA
+REEXPEDIDA
 ```
 
-Cualquier resultado criptográfico se almacena por separado.
+La cadena se conserva como dato de trazabilidad y comparación, no como mecanismo criptográfico.
 
 ---
 
