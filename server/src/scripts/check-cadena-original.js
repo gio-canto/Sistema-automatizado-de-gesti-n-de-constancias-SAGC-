@@ -9,15 +9,15 @@ const input = {
   nombre_persona: 'María José Muñoz López',
   fecha_emision: '2026-09-08',
   tipo_documento: 'CONSTANCIA',
-  evento_emision: 'EVT-000138',
+  evento_emision: 'XXX Foro de Estudios sobre Guerrero',
   token_unico: '8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10',
 };
 
 const expected =
-  'SAGC2|2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|EVT-000138|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10';
+  '2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|XXX-FORO-DE-ESTUDIOS-SOBRE-GUERRERO|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10';
 
 const expectedSha256 =
-  '3b131822cff5af7789ab91eaf6aef26139c41791260170d4a130736da9c65458';
+  'e15297325430c9ed0f4df503495ff7c84f9042f90537e9251edd5d76ecd3d9b6';
 
 const result = generarCadenaOriginal(input);
 const hash = sha256CadenaOriginal(result);
@@ -43,6 +43,6 @@ assert.throws(
   /evento_emision/
 );
 
-console.log('Cadena Original SAGC2: OK');
+console.log('Cadena Original SAGC: OK');
 console.log(result);
 console.log('SHA-256:', hash);
