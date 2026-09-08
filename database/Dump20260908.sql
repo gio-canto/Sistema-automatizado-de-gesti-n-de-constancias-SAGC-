@@ -278,7 +278,6 @@ CREATE TABLE constancias (
   -- FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|NOMBRE_EVENTO_NORMALIZADO|TOKEN_UNICO
   -- El nombre del evento se obtiene de eventos.nombre a través de id_evento.
   cadena_validacion TEXT NOT NULL,
-  hash_documento CHAR(64) NULL,
   qr_destino VARCHAR(600) NOT NULL,
 
   fecha_emision DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
