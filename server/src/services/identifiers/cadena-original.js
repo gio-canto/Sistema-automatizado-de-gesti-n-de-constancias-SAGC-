@@ -1,7 +1,6 @@
 import { createHash } from 'node:crypto';
 
-export const CADENA_ORIGINAL_VERSION = 'SAGC2';
-export const CADENA_ORIGINAL_MAX_BYTES = 768;
+export const CADENA_ORIGINAL_MAX_BYTES = 1024;
 
 function required(value, fieldName) {
   const text = String(value ?? '').trim();
@@ -17,6 +16,22 @@ function stripDiacritics(value) {
   return value
     .normalize('NFKD')
     .replace(/\p{M}/gu, '');
+}
+
+function normalizarTextoConGuiones(value, fieldName) {
+  const result = stripDiacritics(required(value, fieldName))
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+
+  if (!result) {
+    throw new Error(
+      `El campo ${fieldName} no produce una representación canónica válida.`
+    );
+  }
+
+  return result;
 }
 
 export function normalizarFolio(value) {
@@ -38,17 +53,7 @@ export function normalizarFolio(value) {
 }
 
 export function normalizarNombre(value) {
-  const result = stripDiacritics(required(value, 'nombre_persona'))
-    .toUpperCase()
-    .replace(/[^A-Z0-9]+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
-
-  if (!result) {
-    throw new Error('El nombre no produce una representación canónica válida.');
-  }
-
-  return result;
+  return normalizarTextoConGuiones(value, 'nombre_persona');
 }
 
 export function normalizarFecha(value) {
@@ -87,14 +92,10 @@ export function normalizarTipoDocumento(value) {
 }
 
 export function normalizarEventoEmision(value) {
-  const result = stripDiacritics(required(value, 'evento_emision'))
-    .toUpperCase()
-    .replace(/\s+/g, '-');
+  const result = normalizarTextoConGuiones(value, 'evento_emision');
 
-  if (!/^[A-Z0-9][A-Z0-9._-]{0,79}$/.test(result)) {
-    throw new Error(
-      'evento_emision debe usar el código estable del evento (A-Z, 0-9, punto, guion o guion bajo).'
-    );
+  if (result.length > 255) {
+    throw new Error('evento_emision excede 255 caracteres después de normalizarse.');
   }
 
   return result;
@@ -130,7 +131,6 @@ export function generarCadenaOriginal({
   }
 
   const campos = [
-    CADENA_ORIGINAL_VERSION,
     folioCanon,
     normalizarNombre(nombre_persona),
     fechaCanon,
