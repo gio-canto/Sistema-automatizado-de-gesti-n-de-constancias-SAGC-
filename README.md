@@ -1320,17 +1320,38 @@ Username: root
 
 Usar la contraseña configurada durante la instalación de MySQL Server.
 
-### Crear la base
+### Elegir el punto de partida correcto
 
-Abrir:
+El dump real creado el **08/09/2026** se conserva como referencia histórica en:
+
+```text
+database/baseline/Dump20260908.original.sql
+```
+
+No debe editarse ni utilizarse como esquema de desarrollo futuro.
+
+#### Si es una instalación nueva
+
+Ejecutar:
 
 ```text
 database/001_schema.sql
+database/002_seed_catalogos.sql
 ```
 
-y ejecutar todo.
+#### Si la computadora ya tiene la base creada desde Dump20260908.sql
 
-Después ejecutar:
+No ejecutar `001_schema.sql` encima.
+
+Ejecutar:
+
+```text
+database/migrations/001_from_dump20260908.sql
+```
+
+La migración conserva temporalmente las tablas originales con prefijo `legacy_` y crea el esquema canónico.
+
+Después de verificar la migración, ejecutar los catálogos:
 
 ```text
 database/002_seed_catalogos.sql
@@ -1361,8 +1382,12 @@ Si el comando `mysql` está disponible en `PATH`, no es obligatorio abrir Workbe
 Desde la raíz del repositorio:
 
 ```bash
+# Instalación nueva
 mysql -u root -p -e "SOURCE database/001_schema.sql;"
 mysql -u root -p -e "SOURCE database/002_seed_catalogos.sql;"
+
+# SOLO si ya existe la estructura de Dump20260908.sql
+mysql -u root -p -e "SOURCE database/migrations/001_from_dump20260908.sql;"
 ```
 
 MySQL solicitará la contraseña de `root`.
@@ -1798,44 +1823,3 @@ Eliminar rama local si ya no se necesita:
 ```bash
 git branch -d feature/nombre-de-la-funcion
 ```
-
-Eliminar rama remota, cuando corresponda:
-
-```bash
-git push origin --delete feature/nombre-de-la-funcion
-```
-
----
-
-## 20.21 Compilar el frontend manualmente
-
-```bash
-npm run build
-```
-
-Salida:
-
-```text
-dist/
-```
-
-Para previsualizar:
-
-```bash
-npm run preview
-```
-
----
-
-## 20.22 GitHub Pages
-
-El frontend se despliega mediante:
-
-```text
-.github/workflows/deploy-pages.yml
-```
-
-Flujo:
-
-```text
-push a main
