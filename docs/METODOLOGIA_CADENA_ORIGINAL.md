@@ -419,7 +419,7 @@ Una reexpedición es una nueva emisión.
 
 Debe recibir:
 
-- nuevo folio, si así lo define la política de folios;
+- nuevo folio conforme a la Metodología de Folio Único SAGC V1;
 - nuevo token;
 - nueva cadena original;
 - nueva fecha de emisión;
