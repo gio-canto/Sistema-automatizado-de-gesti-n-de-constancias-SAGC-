@@ -85,7 +85,9 @@ Abre y ejecuta:
 database/002_seed_catalogos.sql
 ```
 
-Esto agrega los tipos documentales iniciales y prepara el contador de folios.
+Esto agrega los tipos documentales iniciales y prepara el contador **Folio Único SAGC V1** para el año actual en estado `A / 0`. La primera emisión será `AAAA-A-0001`.
+
+Metodología: `docs/METODOLOGIA_FOLIO_UNICO.md`.
 
 ## 5. Crear usuario de aplicación
 
@@ -229,7 +231,7 @@ Ejecuta:
 database/004_smoke_test.sql
 ```
 
-Sirve para comprobar que la base, tablas y catálogos existen.
+Sirve para comprobar que la base, tablas y catálogos existen. También muestra el estado del contador y el siguiente folio estimado según `AAAA-X-XXXX`.
 
 ## 12. Diagrama EER en Workbench
 
