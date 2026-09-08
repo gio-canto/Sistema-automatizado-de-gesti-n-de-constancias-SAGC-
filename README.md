@@ -375,157 +375,157 @@ El token:
 
 Se recomienda evaluar un identificador generado mediante CSPRNG con suficiente entropía y codificación segura para URL.
 
-## Cadena de validación
+## Cadena Original SAGC
 
-El ejemplo de constancia también incluye una cadena con datos de la emisión.
+La metodología técnica V1 ya está definida en:
 
-La cadena que aparece en los prototipos debe tratarse únicamente como **ejemplo**, no como algoritmo definitivo.
+**[`docs/METODOLOGIA_CADENA_ORIGINAL.md`](./docs/METODOLOGIA_CADENA_ORIGINAL.md)**
 
----
-
-# 8. Metodología obligatoria para cadena y token
-
-Antes de implementar producción se deberá crear un documento técnico específico:
-
-## “Metodología de generación y validación de identificadores SAGC”
-
-<p align="center">
-  <img src="./docs/visual/05-metodologia-identificadores.svg" alt="Metodología pendiente para cadena y token" width="100%" />
-</p>
-
-La metodología deberá definir como mínimo:
-
-### 8.1 Objetivo
-
-Determinar qué función cumple cada elemento:
-
-| Elemento | Función |
-|---|---|
-| Folio | Identificación humana |
-| Token único | Identificador opaco de la emisión |
-| Cadena | Representación verificable de datos de emisión |
-| QR | Acceso al validador |
-| Hash / firma | Integridad, cuando aplique |
-
-### 8.2 Datos inmutables
-
-Definir cuáles campos intervienen.
-
-Ejemplo candidato:
+Formato oficial:
 
 ```text
-version
-id_constancia
-folio
-id_evento
-tipo_documento
-nombre_normalizado
-fecha_emision
-modalidad
-id_autoridad
-token
+SAGC1|FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|TOKEN_UNICO
 ```
-
-### 8.3 Canonicalización
-
-Debe existir una regla exacta para evitar que dos implementaciones generen resultados diferentes.
-
-Definir:
-
-- UTF-8;
-- mayúsculas/minúsculas;
-- espacios;
-- acentos;
-- fechas;
-- valores nulos;
-- separadores;
-- caracteres escapados;
-- orden de campos.
-
-### 8.4 Versionado
-
-La metodología debe incluir una versión.
 
 Ejemplo:
 
 ```text
-SAGC-ID-V1
+SAGC1|FGRO/26/A/001380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
 ```
 
-Esto permitirá cambiar el método en el futuro sin invalidar documentos anteriores.
+La cadena:
 
-### 8.5 Generación del token
+- se genera exclusivamente en backend;
+- es determinista;
+- se almacena en `constancias.cadena_validacion`;
+- no puede editarse manualmente;
+- permanece inmutable después de emitir;
+- cambia de versión únicamente mediante un nuevo marcador, por ejemplo `SAGC2`.
 
-La especificación deberá fijar:
+La cadena original no constituye por sí sola una firma digital. Puede utilizarse posteriormente como entrada de SHA-256, HMAC o firma digital.
 
-- algoritmo;
-- longitud;
-- entropía mínima;
-- codificación;
-- restricciones;
-- índice UNIQUE;
-- política ante colisión.
+---
 
-### 8.6 Construcción de la cadena
+# 8. Metodología de identificadores
 
-La cadena puede representarse mediante una serialización canónica.
+## 8.1 Cadena Original SAGC V1 — definida
 
-No se debe asumir que:
+La especificación normativa se encuentra en:
+
+**[`docs/METODOLOGIA_CADENA_ORIGINAL.md`](./docs/METODOLOGIA_CADENA_ORIGINAL.md)**
+
+La estructura V1 contiene exactamente seis bloques:
 
 ```text
-campo1|campo2|campo3
+SAGC1|FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|TOKEN_UNICO
 ```
 
-sea suficiente sin definir escape, orden y versión.
+### Datos utilizados
 
-### 8.7 Integridad criptográfica
+```text
+folio
+nombre_persona
+fecha_emision
+tipos_documento.clave
+token_unico
+```
 
-Deberá evaluarse qué nivel requiere el Consejo:
+### Reglas principales
 
-- SHA-256 como huella;
-- HMAC-SHA-256 si se necesita autenticidad basada en secreto del servidor;
-- firma digital si se requiere una garantía criptográfica más fuerte.
+- UTF-8;
+- versión fija `SAGC1`;
+- orden de campos invariable;
+- fecha `YYYY-MM-DD`;
+- nombre normalizado sin diacríticos, en mayúsculas y separado por guiones;
+- folio normalizado en mayúsculas y sin espacios;
+- tipo documental obtenido de su `clave`;
+- token conservado sin alterar mayúsculas/minúsculas;
+- escape de `%`, `|`, CR y LF;
+- máximo 512 bytes;
+- generación únicamente server-side;
+- persistencia exacta en `cadena_validacion`;
+- inmutabilidad después de emisión.
 
-La decisión no debe improvisarse durante la programación.
+### Vector oficial
 
-### 8.8 QR
+Entrada:
 
-Recomendación inicial:
+```text
+FGRO/26/A/001380
+María José Muñoz López
+2026-09-08
+CONSTANCIA
+8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
+```
+
+Salida:
+
+```text
+SAGC1|FGRO/26/A/001380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
+```
+
+SHA-256 de control:
+
+```text
+0882b0e5eab280b80cfbe2777fdff696e502af84842fd4459ba289505de4b0e6
+```
+
+Implementación de referencia:
+
+```text
+server/src/services/identifiers/cadena-original.js
+```
+
+Prueba ejecutable:
+
+```bash
+npm --prefix server run chain:test
+```
+
+## 8.2 Token único — pendiente de metodología propia
+
+La cadena V1 ya define **cómo consume** el token, pero todavía debe fijarse formalmente:
+
+- algoritmo de generación;
+- número de bits de entropía;
+- longitud;
+- alfabeto/codificación;
+- política ante colisiones;
+- exposición pública;
+- comportamiento institucional ante reexpedición.
+
+El token debe continuar siendo generado en backend, único, impredecible y no editable.
+
+## 8.3 Integridad criptográfica
+
+La Cadena Original es la representación canónica. Si el proyecto requiere autenticidad criptográfica adicional, deberá añadirse una capa separada:
+
+```text
+SHA-256(cadena_original)
+HMAC-SHA-256(cadena_original, secreto)
+FIRMA_DIGITAL(cadena_original, clave_privada)
+```
+
+Ese sello no debe modificar la estructura `SAGC1`.
+
+## 8.4 QR
+
+La recomendación permanece:
 
 ```text
 https://dominio/sagc/validacion/<token>
 ```
 
-o una ruta equivalente con identificador opaco.
+La cadena completa no debe colocarse en la URL porque contiene el nombre normalizado del titular.
 
-Esto evita colocar innecesariamente nombre completo y otros datos personales en la URL.
+## 8.5 Cancelación y reexpedición
 
-La consulta manual por nombre + folio puede mantenerse como método secundario.
+Regla técnica V1:
 
-### 8.9 Cancelación y reexpedición
-
-Debe definirse:
-
-- si un token cancelado permanece consultable;
-- qué muestra el validador;
-- si una reexpedición obtiene nuevo token;
-- relación entre documento original y reemplazo.
-
-### 8.10 Entregables de la metodología
-
-Antes de cerrar este módulo deberán existir:
-
-- especificación escrita;
-- pseudocódigo;
-- ejemplos de entrada/salida;
-- casos de prueba;
-- reglas de unicidad;
-- política de versionado;
-- modelo de amenazas;
-- esquema de base de datos;
-- restricciones SQL;
-- pruebas de colisión;
-- pruebas de validación.
+- una cancelación no modifica folio, token ni cadena original;
+- el estado cambia a `CANCELADA`;
+- una reexpedición crea una nueva emisión y una nueva cadena;
+- la relación con la emisión anterior se conserva mediante `id_constancia_origen`.
 
 ---
 
@@ -875,7 +875,8 @@ respaldos con datos personales
 - importación XLSX;
 - revisión de datos;
 - contador de folios;
-- metodología de cadena/token;
+- metodología definitiva del token único;
+- integración de Cadena Original SAGC1 en el flujo de emisión;
 - generación de QR;
 - motor PDF;
 - ZIP;
@@ -903,7 +904,8 @@ respaldos con datos personales
 - [ ] Definir tipos documentales
 - [ ] Definir formato XLSX
 - [ ] Definir política de plantillas
-- [ ] **Crear metodología de cadena + token único**
+- [x] **Definir metodología de Cadena Original SAGC V1**
+- [ ] Definir metodología del token único
 - [ ] Definir convención oficial de folios
 - [ ] Definir qué datos serán públicos
 
@@ -948,10 +950,12 @@ respaldos con datos personales
 
 - [ ] Contador de folios
 - [ ] Token
-- [ ] Cadena
-- [ ] Hash/HMAC/firma según metodología
+- [x] Metodología Cadena Original SAGC1
+- [x] Implementación de referencia y vector de prueba de cadena
+- [ ] Integrar cadena al flujo real de emisión
+- [ ] Hash/HMAC/firma si se aprueba
 - [ ] QR
-- [ ] Casos de prueba
+- [ ] Pruebas integrales
 
 ## Fase 7 — Generación
 
@@ -1023,13 +1027,15 @@ El MVP deberá demostrar de extremo a extremo:
 
 ## Cadena y token
 
-- [ ] metodología formal;
-- [ ] nivel criptográfico;
-- [ ] formato de token;
-- [ ] formato de cadena;
-- [ ] URL del QR;
-- [ ] versionado;
-- [ ] comportamiento al cancelar;
+- [x] metodología técnica de Cadena Original SAGC V1;
+- [x] formato de cadena `SAGC1`;
+- [x] versionado de cadena;
+- [x] reglas técnicas de cancelación/reexpedición de cadena;
+- [ ] metodología formal del token;
+- [ ] nivel criptográfico institucional;
+- [ ] formato definitivo de token;
+- [ ] URL institucional del QR;
+- [ ] aprobación del Consejo sobre la metodología;
 - [ ] datos mostrados al público.
 
 ## Plantillas
