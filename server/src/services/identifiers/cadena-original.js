@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 
-export const CADENA_ORIGINAL_VERSION = 'SAGC1';
-export const CADENA_ORIGINAL_MAX_BYTES = 512;
+export const CADENA_ORIGINAL_VERSION = 'SAGC2';
+export const CADENA_ORIGINAL_MAX_BYTES = 768;
 
 function required(value, fieldName) {
   const text = String(value ?? '').trim();
@@ -86,6 +86,20 @@ export function normalizarTipoDocumento(value) {
   return result;
 }
 
+export function normalizarEventoEmision(value) {
+  const result = stripDiacritics(required(value, 'evento_emision'))
+    .toUpperCase()
+    .replace(/\s+/g, '-');
+
+  if (!/^[A-Z0-9][A-Z0-9._-]{0,79}$/.test(result)) {
+    throw new Error(
+      'evento_emision debe usar el código estable del evento (A-Z, 0-9, punto, guion o guion bajo).'
+    );
+  }
+
+  return result;
+}
+
 export function normalizarToken(value) {
   return required(value, 'token_unico');
 }
@@ -103,6 +117,7 @@ export function generarCadenaOriginal({
   nombre_persona,
   fecha_emision,
   tipo_documento,
+  evento_emision,
   token_unico,
 }) {
   const folioCanon = normalizarFolio(folio);
@@ -120,6 +135,7 @@ export function generarCadenaOriginal({
     normalizarNombre(nombre_persona),
     fechaCanon,
     normalizarTipoDocumento(tipo_documento),
+    normalizarEventoEmision(evento_emision),
     normalizarToken(token_unico),
   ].map(escaparCampoCadena);
 
