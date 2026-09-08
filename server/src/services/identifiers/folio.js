@@ -117,9 +117,8 @@ export async function asignarSiguienteFolio(connection, fechaEmision) {
   const anio = obtenerAnioEmision(fechaEmision);
 
   await connection.execute(
-    `INSERT INTO contador_folios (anio, serie, ultimo_valor)
-     VALUES (?, 'A', 0)
-     ON DUPLICATE KEY UPDATE anio = VALUES(anio)`,
+    `INSERT IGNORE INTO contador_folios (anio, serie, ultimo_valor)
+     VALUES (?, 'A', 0)`,
     [anio]
   );
 
