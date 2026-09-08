@@ -20,9 +20,21 @@ function stripDiacritics(value) {
 }
 
 export function normalizarFolio(value) {
-  return required(value, 'folio')
+  const result = required(value, 'folio')
     .toUpperCase()
     .replace(/\s+/g, '');
+
+  if (!/^\d{4}-[A-Z]-\d{4}$/.test(result)) {
+    throw new Error('folio debe utilizar el formato AAAA-X-XXXX.');
+  }
+
+  const consecutivo = Number(result.slice(-4));
+
+  if (consecutivo < 1 || consecutivo > 9999) {
+    throw new Error('El consecutivo del folio debe estar entre 0001 y 9999.');
+  }
+
+  return result;
 }
 
 export function normalizarNombre(value) {
