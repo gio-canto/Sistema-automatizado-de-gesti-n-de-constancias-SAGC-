@@ -24,6 +24,15 @@ const hash = sha256CadenaOriginal(result);
 assert.equal(result, expected);
 assert.equal(hash, expectedSha256);
 
+assert.throws(
+  () =>
+    generarCadenaOriginal({
+      ...input,
+      folio: '2025-A-1380',
+    }),
+  /año del folio debe coincidir/
+);
+
 console.log('Cadena Original SAGC1: OK');
 console.log(result);
 console.log('SHA-256:', hash);
