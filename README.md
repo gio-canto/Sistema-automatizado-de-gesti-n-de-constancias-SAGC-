@@ -1069,7 +1069,7 @@ El MVP deberá demostrar de extremo a extremo:
 ## Cadena y token
 
 - [x] metodología técnica de Cadena Original SAGC V2;
-- [x] formato de cadena `SAGC2`;
+- [x] formato oficial de cadena sin prefijo de versión;
 - [x] versionado de cadena;
 - [x] reglas técnicas de cancelación/reexpedición de cadena;
 - [ ] metodología formal del token;
