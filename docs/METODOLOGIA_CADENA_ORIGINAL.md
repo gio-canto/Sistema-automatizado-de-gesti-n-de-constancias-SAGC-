@@ -12,7 +12,7 @@
 
 La **Cadena Original SAGC** es una representación textual canónica, determinista e inmutable de los datos esenciales de una emisión.
 
-La versión vigente incorpora el **nombre del evento de emisión** tal como está registrado en `eventos.nombre`. La cadena ya no incluye un texto de versión como `SAGC1` o `SAGC2` al inicio.
+La versión vigente incorpora el **nombre del evento de emisión** tal como está registrado en `eventos.nombre`. La cadena no incluye ningún texto de versión al inicio.
 
 La versión de la metodología se controla en documentación y código, no dentro del valor emitido.
 
