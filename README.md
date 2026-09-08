@@ -407,20 +407,20 @@ Se recomienda evaluar un identificador generado mediante CSPRNG con suficiente e
 
 ## Cadena Original SAGC
 
-La metodología técnica V1 ya está definida en:
+La metodología técnica vigente ya está definida en:
 
 **[`docs/METODOLOGIA_CADENA_ORIGINAL.md`](./docs/METODOLOGIA_CADENA_ORIGINAL.md)**
 
 Formato oficial:
 
 ```text
-SAGC2|FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|EVENTO_EMISION|TOKEN_UNICO
+FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|NOMBRE_EVENTO_NORMALIZADO|TOKEN_UNICO
 ```
 
 Ejemplo:
 
 ```text
-SAGC2|2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|EVT-000138|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
+2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|XXX-FORO-DE-ESTUDIOS-SOBRE-GUERRERO|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
 ```
 
 La cadena:
@@ -430,7 +430,7 @@ La cadena:
 - se almacena en `constancias.cadena_validacion`;
 - no puede editarse manualmente;
 - permanece inmutable después de emitir;
-- cambia de versión únicamente mediante un nuevo marcador, por ejemplo `SAGC2`.
+- no lleva prefijo de versión dentro de la cadena; el versionado se controla en documentación y código.
 
 La cadena original no constituye por sí sola una firma digital. Puede utilizarse posteriormente como entrada de SHA-256, HMAC o firma digital.
 
@@ -438,16 +438,16 @@ La cadena original no constituye por sí sola una firma digital. Puede utilizars
 
 # 8. Metodología de identificadores
 
-## 8.1 Cadena Original SAGC V2 — definida
+## 8.1 Cadena Original SAGC — definida
 
 La especificación normativa se encuentra en:
 
 **[`docs/METODOLOGIA_CADENA_ORIGINAL.md`](./docs/METODOLOGIA_CADENA_ORIGINAL.md)**
 
-La estructura V1 contiene exactamente seis bloques:
+La cadena contiene exactamente seis bloques:
 
 ```text
-SAGC2|FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|EVENTO_EMISION|TOKEN_UNICO
+FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|NOMBRE_EVENTO_NORMALIZADO|TOKEN_UNICO
 ```
 
 ### Datos utilizados
@@ -457,23 +457,22 @@ folio
 nombre_persona
 fecha_emision
 tipos_documento.clave
-eventos.codigo
+eventos.nombre
 token_unico
 ```
 
 ### Reglas principales
 
 - UTF-8;
-- versión fija `SAGC2`;
 - orden de campos invariable;
 - fecha `YYYY-MM-DD`;
 - nombre normalizado sin diacríticos, en mayúsculas y separado por guiones;
 - folio validado con formato `AAAA-X-XXXX`;
 - tipo documental obtenido de su `clave`;
-- evento de emisión obtenido de `eventos.codigo`;
+- evento de emisión obtenido del nombre almacenado en `eventos.nombre`;
 - token conservado sin alterar mayúsculas/minúsculas;
 - escape de `%`, `|`, CR y LF;
-- máximo 512 bytes;
+- máximo 1024 bytes;
 - generación únicamente server-side;
 - persistencia exacta en `cadena_validacion`;
 - inmutabilidad después de emisión.
@@ -487,20 +486,20 @@ Entrada:
 María José Muñoz López
 2026-09-08
 CONSTANCIA
-EVT-000138
+XXX Foro de Estudios sobre Guerrero
 8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
 ```
 
 Salida:
 
 ```text
-SAGC2|2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|EVT-000138|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
+2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|XXX-FORO-DE-ESTUDIOS-SOBRE-GUERRERO|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
 ```
 
 SHA-256 de control:
 
 ```text
-3b131822cff5af7789ab91eaf6aef26139c41791260170d4a130736da9c65458
+e15297325430c9ed0f4df503495ff7c84f9042f90537e9251edd5d76ecd3d9b6
 ```
 
 Implementación de referencia:
@@ -517,7 +516,7 @@ npm --prefix server run chain:test
 
 ## 8.2 Token único — pendiente de metodología propia
 
-La cadena V1 ya define **cómo consume** el token, pero todavía debe fijarse formalmente:
+La cadena vigente ya define **cómo consume** el token, pero todavía debe fijarse formalmente:
 
 - algoritmo de generación;
 - número de bits de entropía;
@@ -539,7 +538,7 @@ HMAC-SHA-256(cadena_original, secreto)
 FIRMA_DIGITAL(cadena_original, clave_privada)
 ```
 
-Ese sello no debe modificar la estructura `SAGC2`.
+Ese sello se almacena por separado y no modifica la cadena original.
 
 ## 8.4 QR
 
@@ -553,7 +552,7 @@ La cadena completa no debe colocarse en la URL porque contiene el nombre normali
 
 ## 8.5 Cancelación y reexpedición
 
-Regla técnica V1:
+Regla técnica vigente:
 
 - una cancelación no modifica folio, token ni cadena original;
 - el estado cambia a `CANCELADA`;
@@ -916,7 +915,7 @@ respaldos con datos personales
 - revisión de datos;
 - contador de folios;
 - metodología definitiva del token único;
-- integración de Cadena Original SAGC2 en el flujo de emisión;
+- integración de Cadena Original SAGC en el flujo de emisión;
 - generación de QR;
 - motor PDF;
 - ZIP;
@@ -992,7 +991,7 @@ respaldos con datos personales
 - [x] Servicio transaccional de referencia del folio
 - [ ] Integrar asignación del folio en la transacción completa de emisión
 - [ ] Token
-- [x] Metodología Cadena Original SAGC2
+- [x] Metodología Cadena Original SAGC
 - [x] Implementación de referencia y vector de prueba de cadena
 - [ ] Integrar cadena al flujo real de emisión
 - [ ] Hash/HMAC/firma si se aprueba
