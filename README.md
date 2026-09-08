@@ -335,28 +335,58 @@ Esta parte debe considerarse **un subsistema propio**.
 
 No se debe implementar con concatenaciones improvisadas dentro del frontend.
 
-## Folio
+## Folio Único SAGC V1
 
-Identificador legible por personas.
+La metodología oficial está definida en:
 
-Ejemplo conceptual:
+**[`docs/METODOLOGIA_FOLIO_UNICO.md`](./docs/METODOLOGIA_FOLIO_UNICO.md)**
+
+Formato:
 
 ```text
-FGRO/25/1380
+AAAA-X-XXXX
 ```
 
-La metodología definitiva deberá definir:
+Secuencia:
 
-- prefijo;
-- año;
-- consecutivo;
-- reinicio anual o global;
-- tratamiento de cancelaciones;
-- reservas;
-- concurrencia;
-- reexpediciones.
+```text
+2026-A-0001
+...
+2026-A-9999
+2026-B-0001
+...
+2026-Z-9999
+2027-A-0001
+```
 
-La asignación debe hacerse en el backend mediante una operación atómica.
+Reglas:
+
+- `AAAA` es el año de emisión;
+- la serie inicia en `A`;
+- el consecutivo inicia en `0001`;
+- al llegar a `9999`, la siguiente emisión avanza a la serie consecutiva y reinicia en `0001`;
+- al cambiar de año, vuelve a `A-0001`;
+- un folio cancelado nunca se reutiliza;
+- `Z-9999` agota la capacidad anual;
+- la asignación se realiza únicamente en backend mediante transacción y bloqueo de fila.
+
+Capacidad máxima por año:
+
+```text
+26 × 9,999 = 259,974 folios
+```
+
+Implementación de referencia:
+
+```text
+server/src/services/identifiers/folio.js
+```
+
+Prueba:
+
+```bash
+npm --prefix server run folio:test
+```
 
 ## Token único
 
@@ -390,7 +420,7 @@ SAGC1|FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|TOKEN_UNICO
 Ejemplo:
 
 ```text
-SAGC1|FGRO/26/A/001380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
+SAGC1|2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
 ```
 
 La cadena:
@@ -451,7 +481,7 @@ token_unico
 Entrada:
 
 ```text
-FGRO/26/A/001380
+2026-A-1380
 María José Muñoz López
 2026-09-08
 CONSTANCIA
@@ -461,13 +491,13 @@ CONSTANCIA
 Salida:
 
 ```text
-SAGC1|FGRO/26/A/001380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
+SAGC1|2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
 ```
 
 SHA-256 de control:
 
 ```text
-0882b0e5eab280b80cfbe2777fdff696e502af84842fd4459ba289505de4b0e6
+701f5fd806aa97854775208597b0ca3b370c9e8428e33289d1513f4ab211886e
 ```
 
 Implementación de referencia:
@@ -786,7 +816,14 @@ id_constancia_origen
 
 ## contador_folios
 
-Debe garantizar concurrencia y evitar colisiones.
+```text
+anio
+serie
+ultimo_valor
+fecha_actualizacion
+```
+
+Implementa el estado del Folio Único SAGC V1. Debe garantizar concurrencia mediante transacción y bloqueo de fila.
 
 ## auditoria
 
@@ -906,7 +943,7 @@ respaldos con datos personales
 - [ ] Definir política de plantillas
 - [x] **Definir metodología de Cadena Original SAGC V1**
 - [ ] Definir metodología del token único
-- [ ] Definir convención oficial de folios
+- [x] Definir metodología Folio Único SAGC V1
 - [ ] Definir qué datos serán públicos
 
 ## Fase 2 — Backend y autenticación
@@ -948,7 +985,9 @@ respaldos con datos personales
 
 ## Fase 6 — Identificadores
 
-- [ ] Contador de folios
+- [x] Metodología Folio Único SAGC V1
+- [x] Servicio transaccional de referencia del folio
+- [ ] Integrar asignación del folio en la transacción completa de emisión
 - [ ] Token
 - [x] Metodología Cadena Original SAGC1
 - [x] Implementación de referencia y vector de prueba de cadena
