@@ -1320,42 +1320,32 @@ Username: root
 
 Usar la contraseña configurada durante la instalación de MySQL Server.
 
-### Elegir el punto de partida correcto
+### Crear la base oficial SAGC
 
-El dump real creado el **08/09/2026** se conserva como referencia histórica en:
-
-```text
-database/baseline/Dump20260908.original.sql
-```
-
-No debe editarse ni utilizarse como esquema de desarrollo futuro.
-
-#### Si es una instalación nueva
-
-Ejecutar:
+La base oficial ya corregida se encuentra en:
 
 ```text
-database/001_schema.sql
-database/002_seed_catalogos.sql
+database/Dump20260908.sql
 ```
 
-#### Si la computadora ya tiene la base creada desde Dump20260908.sql
+Ese archivo **ya contiene la estructura planeada** y sustituye el modelo preliminar que se había generado inicialmente en Workbench.
 
-No ejecutar `001_schema.sql` encima.
-
-Ejecutar:
+Para una instalación limpia, ejecutarlo completo:
 
 ```text
-database/migrations/001_from_dump20260908.sql
+database/Dump20260908.sql
 ```
 
-La migración conserva temporalmente las tablas originales con prefijo `legacy_` y crea el esquema canónico.
-
-Después de verificar la migración, ejecutar los catálogos:
+Después puede ejecutarse:
 
 ```text
-database/002_seed_catalogos.sql
+database/004_smoke_test.sql
 ```
+
+para comprobar tablas, relaciones y contador de folios.
+
+> [!CAUTION]
+> El dump oficial reconstruye las tablas del esquema `sagc`. Si existe información que deba conservarse, hacer un respaldo antes de ejecutarlo.
 
 Esto prepara:
 
@@ -1382,12 +1372,8 @@ Si el comando `mysql` está disponible en `PATH`, no es obligatorio abrir Workbe
 Desde la raíz del repositorio:
 
 ```bash
-# Instalación nueva
-mysql -u root -p -e "SOURCE database/001_schema.sql;"
-mysql -u root -p -e "SOURCE database/002_seed_catalogos.sql;"
-
-# SOLO si ya existe la estructura de Dump20260908.sql
-mysql -u root -p -e "SOURCE database/migrations/001_from_dump20260908.sql;"
+mysql -u root -p -e "SOURCE database/Dump20260908.sql;"
+mysql -u root -p -e "SOURCE database/004_smoke_test.sql;"
 ```
 
 MySQL solicitará la contraseña de `root`.
