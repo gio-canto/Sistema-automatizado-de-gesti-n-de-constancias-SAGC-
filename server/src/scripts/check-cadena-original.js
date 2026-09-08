@@ -5,7 +5,7 @@ import {
 } from '../services/identifiers/cadena-original.js';
 
 const input = {
-  folio: 'FGRO/26/A/001380',
+  folio: '2026-A-1380',
   nombre_persona: 'María José Muñoz López',
   fecha_emision: '2026-09-08',
   tipo_documento: 'CONSTANCIA',
@@ -13,10 +13,10 @@ const input = {
 };
 
 const expected =
-  'SAGC1|FGRO/26/A/001380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10';
+  'SAGC1|2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10';
 
 const expectedSha256 =
-  '0882b0e5eab280b80cfbe2777fdff696e502af84842fd4459ba289505de4b0e6';
+  '701f5fd806aa97854775208597b0ca3b370c9e8428e33289d1513f4ab211886e';
 
 const result = generarCadenaOriginal(input);
 const hash = sha256CadenaOriginal(result);
