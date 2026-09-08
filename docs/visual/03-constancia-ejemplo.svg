@@ -13,9 +13,9 @@
 <g fill="#8a1538"><rect x="246" y="526" width="35" height="35"/><rect x="329" y="526" width="35" height="35"/><rect x="246" y="609" width="35" height="35"/><rect x="292" y="574" width="13" height="13"/><rect x="311" y="591" width="17" height="17"/><rect x="338" y="580" width="12" height="12"/><rect x="286" y="623" width="15" height="15"/></g>
 <text x="420" y="535" font-family="Arial,sans-serif" font-size="19" font-weight="700" fill="#555">Autoridad emisora: Mtro. Miguel Ángel Rendón Liborio</text>
 <text x="420" y="568" font-family="Arial,sans-serif" font-size="17" fill="#555">Director del Consejo de Ciencia, Tecnología e Innovación del Estado de Guerrero</text>
-<text x="420" y="615" font-family="Arial,sans-serif" font-size="16" fill="#555">Cadena: <tspan font-family="monospace">SAGC1|FGRO/25/1380|...|PONENCIA|...</tspan></text>
+<text x="420" y="615" font-family="Arial,sans-serif" font-size="16" fill="#555">Cadena: <tspan font-family="monospace">SAGC1|2025-A-1380|...|PONENCIA|...</tspan></text>
 <text x="220" y="820" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#202124">Token único: TOKEN-XXXXXXXXXXXX</text>
-<text x="220" y="852" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#202124">Folio: FGRO/25/1380</text>
+<text x="220" y="852" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#202124">Folio: 2025-A-1380</text>
 <text x="1040" y="852" text-anchor="end" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#202124">Acapulco de Juárez, Gro. · 14/11/2025</text>
 <g font-family="Arial,sans-serif">
 <rect x="1220" y="105" width="230" height="110" rx="16" fill="#eef5ff"/><text x="1335" y="143" text-anchor="middle" font-size="18" font-weight="700" fill="#1877f2">Folio</text><text x="1335" y="175" text-anchor="middle" font-size="15" fill="#53606f">Referencia visible</text><path d="M1220 160H1150V830H1050" fill="none" stroke="#1877f2" stroke-width="3"/>
