@@ -7,12 +7,21 @@ SHOW TABLES;
 SELECT * FROM tipos_documento ORDER BY id_tipo_documento;
 
 SELECT
-  serie,
   anio,
-  generacion,
-  ultimo_valor
+  serie,
+  ultimo_valor,
+  CASE
+    WHEN ultimo_valor = 0 THEN CONCAT(anio, '-', serie, '-0001')
+    WHEN ultimo_valor < 9999 THEN CONCAT(
+      anio, '-', serie, '-', LPAD(ultimo_valor + 1, 4, '0')
+    )
+    WHEN serie < 'Z' THEN CONCAT(
+      anio, '-', CHAR(ASCII(serie) + 1), '-0001'
+    )
+    ELSE 'FOLIOS_AGOTADOS'
+  END AS siguiente_folio_estimado
 FROM contador_folios
-ORDER BY anio DESC, generacion, serie;
+ORDER BY anio DESC;
 
 SELECT
   TABLE_NAME,
