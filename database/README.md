@@ -154,7 +154,7 @@ database/migrations/
 Ejemplo:
 
 ```text
-001_auth_sessions.sql
-002_emisiones_lotes.sql
-003_identifier_methodology_v1.sql
+001_folio_unico_v1.sql
+002_auth_sessions.sql
+003_emisiones_lotes.sql
 ```
