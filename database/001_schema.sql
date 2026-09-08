@@ -1,6 +1,20 @@
--- SAGC · Esquema inicial MySQL v0.1
--- Requiere MySQL 8.x
--- Ejecutar con una cuenta administradora desde MySQL Workbench.
+-- SAGC · Esquema canónico inicial
+-- Base real de referencia: Dump20260908.sql (08/09/2026)
+-- MySQL 8.x
+--
+-- Este archivo representa cómo debe quedar una instalación nueva de SAGC.
+-- Si ya existe una BD creada desde Dump20260908.sql, ejecutar:
+--   database/migrations/001_from_dump20260908.sql
+--
+-- Convenciones:
+--   * nombres en snake_case
+--   * sin acentos en identificadores SQL
+--   * tablas en plural
+--   * claves primarias BIGINT UNSIGNED
+--   * InnoDB + utf8mb4
+--   * folio y token con UNIQUE
+--
+-- La metodología definitiva de cadena/token continúa pendiente de aprobación.
 
 CREATE DATABASE IF NOT EXISTS sagc
   CHARACTER SET utf8mb4
@@ -48,6 +62,7 @@ CREATE TABLE IF NOT EXISTS eventos (
   lugar VARCHAR(255) NULL,
   fecha_inicio DATE NULL,
   fecha_fin DATE NULL,
+  creado_por BIGINT UNSIGNED NULL,
   id_responsable BIGINT UNSIGNED NULL,
   estado ENUM('BORRADOR', 'ACTIVO', 'CERRADO', 'CANCELADO')
     NOT NULL DEFAULT 'BORRADOR',
@@ -57,10 +72,35 @@ CREATE TABLE IF NOT EXISTS eventos (
   PRIMARY KEY (id_evento),
   UNIQUE KEY uq_eventos_codigo (codigo),
   KEY idx_eventos_estado (estado),
+  KEY idx_eventos_creado_por (creado_por),
+  KEY idx_eventos_responsable (id_responsable),
+  CONSTRAINT fk_eventos_creado_por
+    FOREIGN KEY (creado_por) REFERENCES usuarios(id_usuario)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL,
   CONSTRAINT fk_eventos_responsable
     FOREIGN KEY (id_responsable) REFERENCES usuarios(id_usuario)
     ON UPDATE CASCADE
     ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS textos_evento (
+  id_texto BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  id_evento BIGINT UNSIGNED NOT NULL,
+  encabezado VARCHAR(255) NOT NULL,
+  otorga VARCHAR(100) NULL,
+  tipo VARCHAR(100) NOT NULL,
+  cuerpo TEXT NULL,
+  lugar_fecha VARCHAR(255) NULL,
+  fecha_creacion DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  fecha_actualizacion DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+    ON UPDATE CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (id_texto),
+  KEY idx_textos_evento (id_evento),
+  CONSTRAINT fk_textos_evento_evento
+    FOREIGN KEY (id_evento) REFERENCES eventos(id_evento)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS campos_evento (
@@ -88,21 +128,22 @@ CREATE TABLE IF NOT EXISTS plantillas (
   nombre VARCHAR(180) NOT NULL,
   version INT UNSIGNED NOT NULL DEFAULT 1,
   modo ENUM('TEMPORAL', 'REUTILIZABLE') NOT NULL DEFAULT 'REUTILIZABLE',
-  orientacion ENUM('VERTICAL', 'HORIZONTAL') NOT NULL,
-  tamano VARCHAR(50) NOT NULL,
   archivo_url VARCHAR(500) NOT NULL,
   miniatura_url VARCHAR(500) NULL,
   mime_type VARCHAR(100) NULL,
   ancho_px INT UNSIGNED NULL,
   alto_px INT UNSIGNED NULL,
-  activo BOOLEAN NOT NULL DEFAULT TRUE,
+  orientacion ENUM('VERTICAL', 'HORIZONTAL') NOT NULL,
+  tamano VARCHAR(50) NOT NULL,
   creado_por BIGINT UNSIGNED NULL,
+  activo BOOLEAN NOT NULL DEFAULT TRUE,
   fecha_creacion DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   fecha_actualizacion DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
     ON UPDATE CURRENT_TIMESTAMP(3),
   PRIMARY KEY (id_plantilla),
   UNIQUE KEY uq_plantillas_nombre_version (nombre, version),
   KEY idx_plantillas_tipo_activo (id_tipo_documento, activo),
+  KEY idx_plantillas_creado_por (creado_por),
   CONSTRAINT fk_plantillas_tipo
     FOREIGN KEY (id_tipo_documento) REFERENCES tipos_documento(id_tipo_documento)
     ON UPDATE CASCADE
@@ -116,10 +157,11 @@ CREATE TABLE IF NOT EXISTS plantillas (
 CREATE TABLE IF NOT EXISTS contador_folios (
   serie VARCHAR(30) NOT NULL,
   anio SMALLINT UNSIGNED NOT NULL,
+  generacion VARCHAR(10) NOT NULL,
   ultimo_valor BIGINT UNSIGNED NOT NULL DEFAULT 0,
   fecha_actualizacion DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
     ON UPDATE CURRENT_TIMESTAMP(3),
-  PRIMARY KEY (serie, anio)
+  PRIMARY KEY (serie, anio, generacion)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS constancias (
@@ -133,9 +175,9 @@ CREATE TABLE IF NOT EXISTS constancias (
   token_unico VARCHAR(160) NOT NULL,
   cadena_validacion TEXT NOT NULL,
   hash_documento CHAR(64) NULL,
-  qr_destino VARCHAR(600) NOT NULL,
+  qr_destino VARCHAR(600) NULL,
   fecha_emision DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  emitido_por BIGINT UNSIGNED NOT NULL,
+  emitido_por BIGINT UNSIGNED NULL,
   estado ENUM('EMITIDA', 'CANCELADA', 'REEXPEDIDA')
     NOT NULL DEFAULT 'EMITIDA',
   id_constancia_origen BIGINT UNSIGNED NULL,
@@ -147,9 +189,12 @@ CREATE TABLE IF NOT EXISTS constancias (
   UNIQUE KEY uq_constancias_folio (folio),
   UNIQUE KEY uq_constancias_token (token_unico),
   KEY idx_constancias_evento (id_evento),
+  KEY idx_constancias_tipo (id_tipo_documento),
+  KEY idx_constancias_plantilla (id_plantilla),
   KEY idx_constancias_nombre (nombre_persona),
   KEY idx_constancias_estado (estado),
   KEY idx_constancias_fecha (fecha_emision),
+  KEY idx_constancias_emisor (emitido_por),
   CONSTRAINT fk_constancias_evento
     FOREIGN KEY (id_evento) REFERENCES eventos(id_evento)
     ON UPDATE CASCADE
@@ -165,7 +210,7 @@ CREATE TABLE IF NOT EXISTS constancias (
   CONSTRAINT fk_constancias_emisor
     FOREIGN KEY (emitido_por) REFERENCES usuarios(id_usuario)
     ON UPDATE CASCADE
-    ON DELETE RESTRICT,
+    ON DELETE SET NULL,
   CONSTRAINT fk_constancias_origen
     FOREIGN KEY (id_constancia_origen) REFERENCES constancias(id_constancia)
     ON UPDATE CASCADE
