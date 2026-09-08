@@ -432,7 +432,7 @@ La cadena:
 - permanece inmutable después de emitir;
 - no lleva prefijo de versión dentro de la cadena; el versionado se controla en documentación y código.
 
-La cadena original se utilizará como dato de trazabilidad y comparación dentro de SAGC. El proyecto no utilizará SHA-256, HMAC ni firma digital para las constancias.
+La cadena original se utilizará como dato de trazabilidad y comparación dentro de SAGC. No se aplicará una capa criptográfica adicional a las constancias.
 
 ---
 
@@ -524,7 +524,7 @@ El token debe continuar siendo generado en backend, único, impredecible y no ed
 
 ## 8.3 Validación del registro
 
-SAGC no aplicará SHA-256, HMAC ni firma digital a las constancias.
+SAGC validará las constancias mediante su registro persistido, folio, token/QR, cadena original y estado de emisión.
 
 La validación se apoyará en el registro almacenado en MySQL, el folio, el token/QR, la cadena original y el estado de la emisión.
 
