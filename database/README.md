@@ -79,16 +79,30 @@ Esto permite folios consecutivos por año/generación sin mezclar secuencias.
 
 La asignación del siguiente folio deberá implementarse mediante transacción en el backend.
 
-## Cadena y token
+## Cadena Original y token
 
-El esquema ya reserva:
+El esquema reserva:
 
 ```text
 token_unico
 cadena_validacion
 ```
 
-pero su algoritmo definitivo todavía debe documentarse en la metodología de identificadores SAGC.
+La **Cadena Original SAGC V1** ya está definida en:
+
+```text
+docs/METODOLOGIA_CADENA_ORIGINAL.md
+```
+
+Formato:
+
+```text
+SAGC1|FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|TOKEN_UNICO
+```
+
+La columna `cadena_validacion` almacena exactamente esa cadena.
+
+La metodología específica para generar `token_unico` continúa como un documento separado pendiente.
 
 ## Futuras modificaciones
 
