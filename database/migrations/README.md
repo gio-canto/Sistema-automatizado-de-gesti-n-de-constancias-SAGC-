@@ -18,7 +18,7 @@ Convención recomendada:
 
 ```text
 001_folio_unico_v1.sql
-002_nombre_del_cambio.sql
+002_remove_hash_documento.sql
 003_nombre_del_cambio.sql
 ```
 
