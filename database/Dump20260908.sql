@@ -9,6 +9,7 @@
 --   * Este archivo es la fuente de verdad del esquema base.
 --   * Para una instalación nueva puede ejecutarse completo.
 --   * No contiene contraseñas reales ni datos personales.
+--   * Folio Único SAGC V1 definido en docs/METODOLOGIA_FOLIO_UNICO.md.
 --   * Cadena Original SAGC V1 definida en docs/METODOLOGIA_CADENA_ORIGINAL.md.
 --   * La metodología específica del token único continúa pendiente de aprobación.
 --   * Las futuras modificaciones estructurales deberán hacerse mediante migrations/.
@@ -235,19 +236,26 @@ CREATE TABLE plantillas (
 -- ---------------------------------------------------------------------
 -- 7. CONTADOR DE FOLIOS
 -- ---------------------------------------------------------------------
--- El consecutivo se controla por serie + año + generación.
--- La asignación definitiva deberá realizarse dentro de una transacción
--- en el backend para evitar colisiones concurrentes.
+-- Folio Único SAGC V1: AAAA-X-XXXX
+-- Cada año inicia en A-0001. Al llegar a X-9999 la siguiente emisión
+-- avanza a la letra consecutiva y reinicia en 0001.
+-- El backend debe bloquear esta fila con SELECT ... FOR UPDATE.
 
 CREATE TABLE contador_folios (
-  serie VARCHAR(30) NOT NULL,
   anio SMALLINT UNSIGNED NOT NULL,
-  generacion VARCHAR(10) NOT NULL,
-  ultimo_valor BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  serie CHAR(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin
+    NOT NULL DEFAULT 'A',
+  ultimo_valor SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   fecha_actualizacion DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
     ON UPDATE CURRENT_TIMESTAMP(3),
 
-  PRIMARY KEY (serie, anio, generacion)
+  PRIMARY KEY (anio),
+
+  CONSTRAINT chk_contador_folios_serie
+    CHECK (serie >= 'A' AND serie <= 'Z'),
+
+  CONSTRAINT chk_contador_folios_valor
+    CHECK (ultimo_valor BETWEEN 0 AND 9999)
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
@@ -263,7 +271,8 @@ CREATE TABLE constancias (
   nombre_persona VARCHAR(220) NOT NULL,
   datos_variables JSON NULL,
 
-  folio VARCHAR(100) NOT NULL,
+  -- Folio Único SAGC V1: AAAA-X-XXXX (ej. 2026-A-0001)
+  folio CHAR(11) NOT NULL,
   token_unico VARCHAR(160) NOT NULL,
   -- Cadena Original SAGC V1:
   -- SAGC1|FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|TOKEN_UNICO
@@ -365,8 +374,8 @@ VALUES
   ('ACREDITACION', 'Acreditación'),
   ('PERSONALIZADO', 'Otros / Personalizado');
 
-INSERT INTO contador_folios (serie, anio, generacion, ultimo_valor)
-VALUES ('SAGC', YEAR(CURDATE()), 'A', 0);
+INSERT INTO contador_folios (anio, serie, ultimo_valor)
+VALUES (YEAR(CURDATE()), 'A', 0);
 
 SET FOREIGN_KEY_CHECKS = @OLD_FOREIGN_KEY_CHECKS;
 
