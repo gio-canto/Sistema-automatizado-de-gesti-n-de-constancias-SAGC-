@@ -125,7 +125,7 @@ token_unico
 cadena_validacion
 ```
 
-La **Cadena Original SAGC V2** ya está definida en:
+La **Cadena Original SAGC** ya está definida en:
 
 ```text
 docs/METODOLOGIA_CADENA_ORIGINAL.md
@@ -134,10 +134,10 @@ docs/METODOLOGIA_CADENA_ORIGINAL.md
 Formato:
 
 ```text
-SAGC2|FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|EVENTO_EMISION|TOKEN_UNICO
+FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|NOMBRE_EVENTO_NORMALIZADO|TOKEN_UNICO
 ```
 
-La columna `cadena_validacion` almacena exactamente esa cadena. El valor `EVENTO_EMISION` se obtiene de `eventos.codigo` mediante la relación `constancias.id_evento`.
+La columna `cadena_validacion` almacena exactamente esa cadena. El nombre del evento se obtiene de `eventos.nombre` mediante la relación `constancias.id_evento` y se normaliza únicamente para construir la cadena.
 
 La metodología específica para generar `token_unico` continúa como un documento separado pendiente.
 
