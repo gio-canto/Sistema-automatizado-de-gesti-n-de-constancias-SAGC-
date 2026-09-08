@@ -1,5 +1,3 @@
-import { createHash } from 'node:crypto';
-
 export const CADENA_ORIGINAL_MAX_BYTES = 1024;
 
 function required(value, fieldName) {
@@ -149,10 +147,4 @@ export function generarCadenaOriginal({
   }
 
   return cadena;
-}
-
-export function sha256CadenaOriginal(cadena) {
-  return createHash('sha256')
-    .update(String(cadena), 'utf8')
-    .digest('hex');
 }
