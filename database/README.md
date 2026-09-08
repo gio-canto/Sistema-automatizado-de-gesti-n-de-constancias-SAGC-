@@ -67,17 +67,54 @@ ultimo_número           → ultimo_valor
 
 Los campos `proyecto`, `area` y `modalidad` ya no se modelan como columnas rígidas. Se definen mediante `campos_evento` y sus valores particulares se almacenan en `constancias.datos_variables`.
 
-## Folios
+## Folio Único SAGC V1
 
-El contador se organiza por:
+La metodología oficial se encuentra en:
 
 ```text
-serie + anio + generacion
+docs/METODOLOGIA_FOLIO_UNICO.md
 ```
 
-Esto permite folios consecutivos por año/generación sin mezclar secuencias.
+Formato:
 
-La asignación del siguiente folio deberá implementarse mediante transacción en el backend.
+```text
+AAAA-X-XXXX
+```
+
+Ejemplos:
+
+```text
+2026-A-0001
+2026-A-9999
+2026-B-0001
+2027-A-0001
+```
+
+La tabla `contador_folios` mantiene un solo estado por año:
+
+```text
+anio
+serie
+ultimo_valor
+```
+
+Cada año inicia en `A / 0`; por eso el primer folio emitido es `AAAA-A-0001`. Al llegar a `9999`, la siguiente emisión avanza a la letra consecutiva y reinicia en `0001`.
+
+La asignación se realiza exclusivamente en backend, dentro de una transacción y bloqueando la fila del año con `SELECT ... FOR UPDATE`.
+
+Implementación:
+
+```text
+server/src/services/identifiers/folio.js
+```
+
+Prueba:
+
+```bash
+npm --prefix server run folio:test
+```
+
+---
 
 ## Cadena Original y token
 
