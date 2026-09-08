@@ -10,7 +10,7 @@
 --   * Para una instalación nueva puede ejecutarse completo.
 --   * No contiene contraseñas reales ni datos personales.
 --   * Folio Único SAGC V1 definido en docs/METODOLOGIA_FOLIO_UNICO.md.
---   * Cadena Original SAGC V2 definida en docs/METODOLOGIA_CADENA_ORIGINAL.md.
+--   * Cadena Original SAGC definida en docs/METODOLOGIA_CADENA_ORIGINAL.md.
 --   * La metodología específica del token único continúa pendiente de aprobación.
 --   * Las futuras modificaciones estructurales deberán hacerse mediante migrations/.
 --
@@ -274,9 +274,9 @@ CREATE TABLE constancias (
   -- Folio Único SAGC V1: AAAA-X-XXXX (ej. 2026-A-0001)
   folio CHAR(11) NOT NULL,
   token_unico VARCHAR(160) NOT NULL,
-  -- Cadena Original SAGC V2:
-  -- SAGC2|FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|EVENTO_EMISION|TOKEN_UNICO
-  -- EVENTO_EMISION se obtiene de eventos.codigo a través de id_evento.
+  -- Cadena Original SAGC:
+  -- FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|NOMBRE_EVENTO_NORMALIZADO|TOKEN_UNICO
+  -- El nombre del evento se obtiene de eventos.nombre a través de id_evento.
   cadena_validacion TEXT NOT NULL,
   hash_documento CHAR(64) NULL,
   qr_destino VARCHAR(600) NOT NULL,
