@@ -19,5 +19,7 @@ WHERE clave IN (
   'PERSONALIZADO'
 );
 
-INSERT IGNORE INTO contador_folios (serie, anio, ultimo_valor)
-VALUES ('FGRO', YEAR(CURDATE()), 0);
+-- Contador inicial de desarrollo.
+-- El formato final del folio debe definirse con la metodología oficial.
+INSERT IGNORE INTO contador_folios (serie, anio, generacion, ultimo_valor)
+VALUES ('SAGC', YEAR(CURDATE()), 'A', 0);
