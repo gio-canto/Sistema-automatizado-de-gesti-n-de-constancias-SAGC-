@@ -105,11 +105,20 @@ export function generarCadenaOriginal({
   tipo_documento,
   token_unico,
 }) {
+  const folioCanon = normalizarFolio(folio);
+  const fechaCanon = normalizarFecha(fecha_emision);
+
+  if (folioCanon.slice(0, 4) !== fechaCanon.slice(0, 4)) {
+    throw new Error(
+      'El año del folio debe coincidir con el año de fecha_emision.'
+    );
+  }
+
   const campos = [
     CADENA_ORIGINAL_VERSION,
-    normalizarFolio(folio),
+    folioCanon,
     normalizarNombre(nombre_persona),
-    normalizarFecha(fecha_emision),
+    fechaCanon,
     normalizarTipoDocumento(tipo_documento),
     normalizarToken(token_unico),
   ].map(escaparCampoCadena);
