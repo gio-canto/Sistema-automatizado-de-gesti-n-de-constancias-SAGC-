@@ -10,7 +10,8 @@
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
     "db:check": "node src/scripts/check-db.js",
-    "db:bootstrap-admin": "node src/scripts/bootstrap-admin.js"
+    "db:bootstrap-admin": "node src/scripts/bootstrap-admin.js",
+    "chain:test": "node src/scripts/check-cadena-original.js"
   },
   "dependencies": {
     "argon2": "^0.41.1",
