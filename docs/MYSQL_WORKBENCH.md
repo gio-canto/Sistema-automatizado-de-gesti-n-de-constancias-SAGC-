@@ -255,7 +255,7 @@ Los cambios futuros del esquema deberán guardarse en scripts versionados, por e
 database/
 ├── Dump20260908.sql
 ├── migrations/
-│   ├── 001_...sql
+│   ├── 001_folio_unico_v1.sql
 │   └── 002_...sql
 ├── 002_seed_catalogos.sql
 ├── 003_create_app_user.example.sql
