@@ -44,27 +44,45 @@ Durante la instalación de MySQL Server conserva la contraseña de la cuenta adm
 4. Pulsa **Test Connection**.
 5. Guarda la conexión.
 
-## 3. Crear la base
+## 3. Identificar qué base tienes
+
+El proyecto ya cuenta con una base real creada en Workbench el **08/09/2026**.
+
+El dump original se conserva sin modificar en:
+
+```text
+database/baseline/Dump20260908.original.sql
+```
+
+### Caso A — instalación nueva
 
 En Workbench:
 
 1. **File > Open SQL Script**.
 2. Abre `database/001_schema.sql`.
 3. Ejecuta todo con el icono de rayo.
-4. Refresca **SCHEMAS**.
+4. Ejecuta después `database/002_seed_catalogos.sql`.
+5. Refresca **SCHEMAS**.
 
-Debe aparecer:
+### Caso B — ya importaste o construiste Dump20260908.sql
 
-```text
-sagc
-```
+No importes `001_schema.sql` encima de esa estructura.
 
-con estas tablas iniciales:
+1. Haz un respaldo.
+2. Abre:
+   `database/migrations/001_from_dump20260908.sql`
+3. Ejecuta la migración.
+4. Comprueba las tablas y los conteos que aparecen al final.
+5. Conserva por el momento las tablas `legacy_*`.
+6. Ejecuta `database/002_seed_catalogos.sql`.
+
+El esquema canónico tendrá:
 
 ```text
 usuarios
 tipos_documento
 eventos
+textos_evento
 campos_evento
 plantillas
 contador_folios
@@ -246,13 +264,17 @@ Los cambios futuros del esquema deberán guardarse en scripts versionados, por e
 
 ```text
 database/
+├── baseline/
+│   └── Dump20260908.original.sql
+├── migrations/
+│   ├── 001_from_dump20260908.sql
+│   ├── 002_...sql
+│   └── 003_...sql
 ├── 001_schema.sql
 ├── 002_seed_catalogos.sql
 ├── 003_create_app_user.example.sql
 ├── 004_smoke_test.sql
-└── migrations/
-    ├── 001_add_emisiones.sql
-    └── 002_add_template_versioning.sql
+└── README.md
 ```
 
 Workbench se usa para inspección, desarrollo y ejecución controlada de scripts; el historial del esquema debe permanecer en Git.
