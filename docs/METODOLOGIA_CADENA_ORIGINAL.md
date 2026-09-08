@@ -357,7 +357,7 @@ https://dominio/sagc/validacion/<token>
 
 ## 18. Modelo de validación
 
-SAGC no utilizará SHA-256, HMAC ni firma digital para las constancias.
+SAGC no aplicará una capa criptográfica adicional a las constancias.
 
 La validación se realizará consultando el registro persistido en SAGC mediante el token/QR y comprobando:
 
@@ -378,7 +378,7 @@ CANCELADA
 REEXPEDIDA
 ```
 
-La cadena se conserva como dato de trazabilidad y comparación, no como mecanismo criptográfico.
+La cadena se conserva como dato de trazabilidad y comparación dentro del registro SAGC.
 
 ---
 
