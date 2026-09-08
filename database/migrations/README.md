@@ -6,12 +6,18 @@ Esta carpeta se utilizará **a partir de los cambios posteriores** a la base ofi
 database/Dump20260908.sql
 ```
 
-No contiene una migración desde el diseño preliminar porque ese diseño ya fue corregido directamente dentro del dump oficial.
+El primer cambio versionado es:
+
+```text
+001_folio_unico_v1.sql
+```
+
+Sirve para actualizar una base local creada antes de adoptar el formato oficial `AAAA-X-XXXX`. Se detiene si ya existen constancias emitidas con el formato anterior para evitar modificar folios históricos.
 
 Convención recomendada:
 
 ```text
-001_nombre_del_cambio.sql
+001_folio_unico_v1.sql
 002_nombre_del_cambio.sql
 003_nombre_del_cambio.sql
 ```
