@@ -19,7 +19,8 @@ WHERE clave IN (
   'PERSONALIZADO'
 );
 
--- Contador inicial de desarrollo.
--- El formato final del folio debe definirse con la metodología oficial.
-INSERT IGNORE INTO contador_folios (serie, anio, generacion, ultimo_valor)
-VALUES ('SAGC', YEAR(CURDATE()), 'A', 0);
+-- Folio Único SAGC V1.
+-- 0 representa que todavía no se ha emitido ningún folio del año.
+-- La primera asignación será AAAA-A-0001.
+INSERT IGNORE INTO contador_folios (anio, serie, ultimo_valor)
+VALUES (YEAR(CURDATE()), 'A', 0);
