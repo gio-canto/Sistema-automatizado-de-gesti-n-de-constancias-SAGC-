@@ -141,7 +141,7 @@ export default function App() {
     }
 
     // Acceso local de prototipo. Se conserva para GitHub Pages,
-    // donde no existe un servidor Node/MySQL.
+    // donde no existe el backend Node conectado a Supabase.
     if (
       normalizedUser.toLowerCase() === DEMO_USER &&
       password === DEMO_PASSWORD
@@ -180,7 +180,7 @@ export default function App() {
       setAuthenticated(true);
     } catch {
       setMessage(
-        'No fue posible contactar el backend. En GitHub Pages use el acceso de prototipo; para usuarios MySQL ejecute la API local.'
+        'No fue posible contactar el backend. En GitHub Pages use el acceso de prototipo; para usuarios reales ejecute la API local conectada a Supabase.'
       );
     } finally {
       setSubmitting(false);
