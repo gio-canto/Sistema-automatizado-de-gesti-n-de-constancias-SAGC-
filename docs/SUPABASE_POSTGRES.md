@@ -27,7 +27,7 @@ React no recibe la clave secreta de Supabase.
 2. Esperar a que PostgreSQL esté disponible.
 3. Abrir **SQL Editor**.
 
-No se requiere instalar MySQL Server ni MySQL Workbench.
+La base se administra desde Supabase; para el flujo normal no se requiere un servidor de base de datos local.
 
 ## 2. Crear el esquema
 
