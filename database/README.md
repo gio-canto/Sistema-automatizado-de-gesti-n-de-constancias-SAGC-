@@ -1,36 +1,41 @@
-# Base de datos SAGC
+# Base de datos SAGC — Supabase + PostgreSQL
 
-La base oficial del proyecto está definida en:
+La tecnología oficial de persistencia de SAGC es:
 
 ```text
-database/Dump20260908.sql
+Supabase
+└── PostgreSQL
 ```
 
-Ese archivo es la **fuente de verdad del esquema base**.
+La fuente de verdad del esquema está en:
 
-El primer modelo creado en Workbench el 08/09/2026 fue corregido directamente y su estructura definitiva quedó integrada en ese mismo archivo. No se mantiene una copia `legacy` ni una migración desde el diseño preliminar.
+```text
+database/schema.sql
+```
 
 ## Estructura
 
 ```text
 database/
-├── Dump20260908.sql
+├── schema.sql
 ├── 002_seed_catalogos.sql
-├── 003_create_app_user.example.sql
 ├── 004_smoke_test.sql
 ├── migrations/
+│   └── README.md
 └── README.md
 ```
 
-## Instalación nueva
+## Instalación del esquema
 
-En MySQL Workbench o desde consola ejecutar:
+En un proyecto nuevo de Supabase:
 
-```text
-Dump20260908.sql
-```
+1. abrir **SQL Editor**;
+2. crear una consulta nueva;
+3. copiar y ejecutar `database/schema.sql`;
+4. ejecutar `database/002_seed_catalogos.sql`;
+5. ejecutar `database/004_smoke_test.sql`.
 
-El dump crea y deja preparadas:
+El esquema crea:
 
 ```text
 usuarios
@@ -44,36 +49,45 @@ constancias
 auditoria
 ```
 
-También agrega los tipos documentales iniciales y crea el contador base de folios.
-
-## Qué se corrigió respecto al primer modelo
+También crea estas funciones PostgreSQL:
 
 ```text
-idUsuarios             → id_usuario
-pasword_hash            → password_hash
-permisos                → permiso
-cuenta_activa           → activo
-ideventos               → id_evento
-nombre_evento           → nombre
-texto                   → textos_evento
-campos_personalisados   → campos_evento
-idplantillas            → id_plantilla
-constancia              → constancias
-token                   → token_unico
-cadena                  → cadena_validacion
-año                     → anio
-ultimo_número           → ultimo_valor
+sagc_healthcheck()
+asignar_siguiente_folio(date)
 ```
 
-Los campos `proyecto`, `area` y `modalidad` ya no se modelan como columnas rígidas. Se definen mediante `campos_evento` y sus valores particulares se almacenan en `constancias.datos_variables`.
+## Acceso desde el backend
+
+SAGC no conecta React directamente a PostgreSQL.
+
+```text
+React/Vite
+   ↓ HTTP / JSON
+Express API
+   ↓ @supabase/supabase-js
+Supabase Data API
+   ↓
+PostgreSQL
+```
+
+El backend utiliza:
+
+```dotenv
+SUPABASE_URL=https://TU_PROJECT_REF.supabase.co
+SUPABASE_SECRET_KEY=sb_secret_...
+```
+
+La clave secreta nunca debe aparecer en React, GitHub Pages ni en el repositorio.
+
+## RLS
+
+Todas las tablas del esquema base tienen **Row Level Security habilitado**.
+
+En esta etapa no se concede acceso directo a `anon` ni `authenticated`. La API Express realiza la autorización y usa la clave secreta del proyecto para las operaciones administrativas.
+
+Si más adelante se decide conectar una parte del frontend directamente con Supabase, deberán diseñarse políticas RLS específicas antes de conceder permisos.
 
 ## Folio Único SAGC V1
-
-La metodología oficial se encuentra en:
-
-```text
-docs/METODOLOGIA_FOLIO_UNICO.md
-```
 
 Formato:
 
@@ -81,80 +95,63 @@ Formato:
 AAAA-X-XXXX
 ```
 
-Ejemplos:
+El contador se almacena en:
 
 ```text
-2026-A-0001
-2026-A-9999
-2026-B-0001
-2027-A-0001
+contador_folios
+├── anio
+├── serie
+├── ultimo_valor
+└── fecha_actualizacion
 ```
 
-La tabla `contador_folios` mantiene un solo estado por año:
+La función:
 
 ```text
-anio
-serie
-ultimo_valor
+public.asignar_siguiente_folio(date)
 ```
 
-Cada año inicia en `A / 0`; por eso el primer folio emitido es `AAAA-A-0001`. Al llegar a `9999`, la siguiente emisión avanza a la letra consecutiva y reinicia en `0001`.
+realiza la reserva del siguiente folio dentro de PostgreSQL y bloquea la fila anual con `FOR UPDATE` para impedir que dos solicitudes reciban el mismo número.
 
-La asignación se realiza exclusivamente en backend, dentro de una transacción y bloqueando la fila del año con `SELECT ... FOR UPDATE`.
+El backend la invoca mediante `supabase.rpc()`.
 
-Implementación:
+## Cadena Original
 
-```text
-server/src/services/identifiers/folio.js
-```
-
-Prueba:
-
-```bash
-npm --prefix server run folio:test
-```
-
----
-
-## Cadena Original y token
-
-El esquema reserva:
-
-```text
-token_unico
-cadena_validacion
-```
-
-La **Cadena Original SAGC** ya está definida en:
-
-```text
-docs/METODOLOGIA_CADENA_ORIGINAL.md
-```
-
-Formato:
+Formato actual:
 
 ```text
 FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|NOMBRE_EVENTO_NORMALIZADO|TOKEN_UNICO
 ```
 
-La columna `cadena_validacion` almacena exactamente esa cadena. El nombre del evento se obtiene de `eventos.nombre` mediante la relación `constancias.id_evento` y se normaliza únicamente para construir la cadena.
+Se almacena en:
 
-La metodología específica para generar `token_unico` continúa como un documento separado pendiente.
+```text
+constancias.cadena_validacion
+```
 
-## Futuras modificaciones
+El evento procede de `eventos.nombre`.
 
-No se debe editar el dump base por cada cambio posterior una vez iniciada la etapa de migraciones.
+## Login
 
-Los siguientes cambios estructurales deberán guardarse en:
+El cambio a Supabase/PostgreSQL no cambia todavía el modelo de autenticación.
+
+SAGC conserva:
+
+```text
+usuarios
+└── password_hash Argon2id
+```
+
+El login ocurre en Express y consulta `usuarios` mediante Supabase.
+
+Supabase Auth podrá evaluarse posteriormente como un cambio separado si el Consejo lo solicita.
+
+## Migraciones futuras
+
+Todo cambio posterior al esquema base deberá agregarse en:
 
 ```text
 database/migrations/
 ```
 
-Ejemplo:
-
-```text
-001_folio_unico_v1.sql
-002_auth_sessions.sql
-003_emisiones_lotes.sql
-```
+y deberá utilizar exclusivamente sintaxis PostgreSQL.
