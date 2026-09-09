@@ -1,26 +1,22 @@
--- SAGC · Datos iniciales no sensibles
-USE sagc;
+-- SAGC · Catálogos iniciales para PostgreSQL / Supabase
 
-INSERT IGNORE INTO tipos_documento (clave, nombre)
-VALUES
-  ('CONSTANCIA', 'Constancia'),
-  ('DIPLOMA', 'Diploma'),
-  ('RECONOCIMIENTO', 'Reconocimiento'),
-  ('ACREDITACION', 'Acreditación'),
-  ('PERSONALIZADO', 'Otros / Personalizado');
+insert into public.tipos_documento (clave, nombre, activo)
+values
+  ('CONSTANCIA', 'Constancia', true),
+  ('DIPLOMA', 'Diploma', true),
+  ('RECONOCIMIENTO', 'Reconocimiento', true),
+  ('ACREDITACION', 'Acreditación', true),
+  ('PERSONALIZADO', 'Otros / Personalizado', true)
+on conflict (clave) do update
+set
+  nombre = excluded.nombre,
+  activo = true;
 
-UPDATE tipos_documento
-SET activo = TRUE
-WHERE clave IN (
-  'CONSTANCIA',
-  'DIPLOMA',
-  'RECONOCIMIENTO',
-  'ACREDITACION',
-  'PERSONALIZADO'
-);
-
--- Folio Único SAGC V1.
--- 0 representa que todavía no se ha emitido ningún folio del año.
--- La primera asignación será AAAA-A-0001.
-INSERT IGNORE INTO contador_folios (anio, serie, ultimo_valor)
-VALUES (YEAR(CURDATE()), 'A', 0);
+-- 0 significa que todavía no se ha emitido ningún folio del año.
+insert into public.contador_folios (anio, serie, ultimo_valor)
+values (
+  extract(year from current_date)::smallint,
+  'A',
+  0
+)
+on conflict (anio) do nothing;
