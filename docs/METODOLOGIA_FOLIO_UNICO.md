@@ -220,12 +220,12 @@ La operación debe bloquear la fila del año mediante:
 
 ```sql
 SELECT serie, ultimo_valor
-FROM contador_folios
-WHERE anio = ?
+FROM public.contador_folios
+WHERE anio = v_anio
 FOR UPDATE;
 ```
 
-La asignación del folio y la inserción de la constancia deben pertenecer a la **misma transacción** cuando se implemente el flujo completo de emisión.
+La reserva del folio se ejecuta en PostgreSQL mediante `public.asignar_siguiente_folio(date)`, invocada desde el backend con `supabase.rpc()`. Para el flujo final de emisión se podrá ampliar a una función transaccional que también inserte la constancia.
 
 Esto evita:
 
