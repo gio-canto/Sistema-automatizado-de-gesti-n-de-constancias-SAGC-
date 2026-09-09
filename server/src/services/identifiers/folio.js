@@ -107,45 +107,39 @@ export function calcularSiguienteEstadoFolio({
 }
 
 /**
- * Asigna el siguiente folio utilizando una conexión MySQL que YA debe
- * encontrarse dentro de la transacción de emisión.
+ * Reserva el siguiente Folio Único mediante una función PostgreSQL
+ * ejecutada por Supabase.
  *
- * El llamador debe hacer BEGIN/COMMIT/ROLLBACK e insertar la constancia
- * en esa misma transacción.
+ * La función public.asignar_siguiente_folio() serializa el contador
+ * del año con SELECT ... FOR UPDATE dentro de PostgreSQL.
  */
-export async function asignarSiguienteFolio(connection, fechaEmision) {
+export async function asignarSiguienteFolio(
+  supabaseClient,
+  fechaEmision
+) {
   const anio = obtenerAnioEmision(fechaEmision);
+  const fecha =
+    fechaEmision instanceof Date
+      ? fechaEmision.toISOString().slice(0, 10)
+      : String(fechaEmision).trim().slice(0, 10);
 
-  await connection.execute(
-    `INSERT IGNORE INTO contador_folios (anio, serie, ultimo_valor)
-     VALUES (?, 'A', 0)`,
-    [anio]
+  const { data, error } = await supabaseClient.rpc(
+    'asignar_siguiente_folio',
+    { p_fecha_emision: fecha }
   );
 
-  const [rows] = await connection.execute(
-    `SELECT serie, ultimo_valor
-     FROM contador_folios
-     WHERE anio = ?
-     FOR UPDATE`,
-    [anio]
-  );
+  if (error) {
+    if (
+      error.message?.includes('FOLIOS_AGOTADOS') ||
+      error.details?.includes('FOLIOS_AGOTADOS')
+    ) {
+      throw new FoliosAgotadosError(anio);
+    }
 
-  if (rows.length !== 1) {
-    throw new Error('No fue posible bloquear el contador de folios.');
+    throw new Error(
+      `No fue posible asignar el siguiente folio: ${error.message}`
+    );
   }
 
-  const estado = calcularSiguienteEstadoFolio({
-    anio,
-    serie: rows[0].serie,
-    ultimoValor: Number(rows[0].ultimo_valor),
-  });
-
-  await connection.execute(
-    `UPDATE contador_folios
-     SET serie = ?, ultimo_valor = ?
-     WHERE anio = ?`,
-    [estado.serie, estado.ultimoValor, anio]
-  );
-
-  return estado.folio;
+  return data;
 }
