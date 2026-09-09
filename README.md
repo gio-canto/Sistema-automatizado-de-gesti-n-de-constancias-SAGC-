@@ -1106,7 +1106,7 @@ Supabase
 PostgreSQL
 ```
 
-No se requiere instalar MySQL Server ni un servidor PostgreSQL local para el flujo normal de desarrollo.
+La base de datos se consume desde el proyecto Supabase configurado para SAGC; no se requiere un servidor PostgreSQL local para el flujo normal de desarrollo.
 
 > [!IMPORTANT]
 > La clave secreta de Supabase es exclusiva del backend. Nunca debe colocarse en React, variables `VITE_*`, GitHub Pages ni archivos versionados.
@@ -1138,7 +1138,7 @@ Node.js LTS
 Visual Studio Code
 ```
 
-Supabase/PostgreSQL es remoto y no requiere instalar MySQL o Workbench.
+Supabase/PostgreSQL se administra desde el proyecto remoto y su SQL Editor.
 
 ### macOS
 
@@ -1427,5 +1427,4 @@ Cambios posteriores:
 database/migrations/
 ```
 
-No volver a agregar SQL específico de MySQL.
-
+Todo cambio futuro de base de datos debe utilizar PostgreSQL compatible con Supabase.
