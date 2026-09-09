@@ -20,7 +20,7 @@ Convención:
 
 Todas las migraciones nuevas deben utilizar sintaxis PostgreSQL y poder ejecutarse desde el SQL Editor de Supabase.
 
-Los scripts históricos de MySQL fueron retirados al cambiar oficialmente de tecnología.
+Las migraciones vigentes del proyecto deben escribirse exclusivamente para PostgreSQL compatible con Supabase.
 
 Cada migración debe documentar:
 
