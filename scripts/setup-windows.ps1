@@ -1,5 +1,5 @@
 # SAGC - Preparación inteligente de herramientas de desarrollo en Windows
-# Supabase/PostgreSQL es remoto; no instala MySQL ni Workbench.
+# Supabase/PostgreSQL es remoto; este script prepara solo herramientas locales.
 
 $ErrorActionPreference = "Stop"
 
