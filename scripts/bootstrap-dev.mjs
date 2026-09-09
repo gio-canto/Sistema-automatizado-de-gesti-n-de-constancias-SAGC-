@@ -50,9 +50,9 @@ if (existsSync(envFile)) {
 } else {
   copyFileSync(envExample, envFile);
   console.log('[OK] server/.env creado desde server/.env.example.');
-  console.log('     Edita DB_PASSWORD antes de iniciar el backend.');
+  console.log('     Edita SUPABASE_URL y SUPABASE_SECRET_KEY antes de iniciar el backend.');
 }
 
 console.log('');
 console.log('Preparación terminada.');
-console.log('Siguiente paso: configurar MySQL y ejecutar npm run db:check.');
+console.log('Siguiente paso: configurar Supabase en server/.env y ejecutar npm run db:check.');
