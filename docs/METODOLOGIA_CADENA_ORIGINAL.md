@@ -72,7 +72,7 @@ Valor incorporado a la cadena:
 XXX-FORO-DE-ESTUDIOS-SOBRE-GUERRERO
 ```
 
-El backend debe obtener `eventos.nombre` desde MySQL a través de `constancias.id_evento` o del evento seleccionado dentro de la transacción de emisión. React no debe poder sustituir libremente ese nombre en el momento final de emitir.
+El backend debe obtener `eventos.nombre` desde Supabase/PostgreSQL a través de `constancias.id_evento` o del evento seleccionado dentro de la transacción de emisión. React no debe poder sustituir libremente ese nombre en el momento final de emitir.
 
 ### Canonicalización del nombre del evento
 
@@ -109,7 +109,7 @@ ASIGNAR FOLIO
     ↓
 GENERAR TOKEN
     ↓
-OBTENER eventos.nombre DESDE MYSQL
+OBTENER eventos.nombre DESDE POSTGRESQL
     ↓
 FIJAR FECHA
     ↓
