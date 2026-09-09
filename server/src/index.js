@@ -3,7 +3,10 @@ import cors from 'cors';
 import helmet from 'helmet';
 import 'dotenv/config';
 import argon2 from 'argon2';
-import { checkDatabaseConnection, pool } from './config/db.js';
+import {
+  checkDatabaseConnection,
+  supabase,
+} from './config/supabase.js';
 
 const app = express();
 const port = Number(process.env.PORT || 3001);
@@ -31,16 +34,16 @@ app.get('/api/health/db', async (_req, res) => {
     const database = await checkDatabaseConnection();
     res.json({ ok: true, database });
   } catch (error) {
-    console.error('Error de conexión con MySQL:', error);
+    console.error('Error de conexión con Supabase/PostgreSQL:', error);
     res.status(503).json({
       ok: false,
-      error: 'No fue posible conectar con MySQL.',
+      error: 'No fue posible conectar con Supabase/PostgreSQL.',
     });
   }
 });
 
 app.post('/api/auth/login', async (req, res) => {
-  const user = String(req.body?.user || '').trim();
+  const user = String(req.body?.user || '').trim().toLowerCase();
   const password = String(req.body?.password || '');
 
   if (!user || !password) {
@@ -51,21 +54,17 @@ app.post('/api/auth/login', async (req, res) => {
   }
 
   try {
-    const [rows] = await pool.execute(
-      `SELECT
-         id_usuario,
-         nombre,
-         usuario,
-         password_hash,
-         permiso,
-         activo
-       FROM usuarios
-       WHERE usuario = ?
-       LIMIT 1`,
-      [user]
-    );
+    const { data: account, error } = await supabase
+      .from('usuarios')
+      .select(
+        'id_usuario,nombre,usuario,password_hash,permiso,activo'
+      )
+      .eq('usuario', user)
+      .maybeSingle();
 
-    const account = rows[0];
+    if (error) {
+      throw error;
+    }
 
     if (!account || !account.activo) {
       return res.status(401).json({
@@ -119,11 +118,11 @@ app.listen(port, async () => {
   try {
     const info = await checkDatabaseConnection();
     console.log(
-      `MySQL conectado: ${info.database_name} · versión ${info.mysql_version}`
+      `Supabase conectado · PostgreSQL · esquema ${info?.schema || 'public'}`
     );
   } catch {
     console.warn(
-      'La API inició, pero MySQL todavía no está disponible. Ejecuta npm run db:check después de configurar server/.env.'
+      'La API inició, pero Supabase todavía no está disponible. Configura server/.env y ejecuta npm run db:check.'
     );
   }
 });
