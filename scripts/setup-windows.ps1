@@ -1,5 +1,5 @@
 # SAGC - Preparación inteligente de herramientas de desarrollo en Windows
-# Comprueba primero; instala solo lo que falta.
+# Supabase/PostgreSQL es remoto; no instala MySQL ni Workbench.
 
 $ErrorActionPreference = "Stop"
 
@@ -15,25 +15,6 @@ function Test-WingetPackage($Id) {
   catch {
     return $false
   }
-}
-
-function Test-MySQLServer {
-  if (Test-Command "mysql") { return $true }
-
-  $services = Get-Service -ErrorAction SilentlyContinue | Where-Object {
-    $_.Name -match "^MySQL" -or $_.DisplayName -match "MySQL"
-  }
-
-  if ($services) { return $true }
-  return Test-WingetPackage "Oracle.MySQL"
-}
-
-function Test-MySQLWorkbench {
-  $path1 = Join-Path $env:ProgramFiles "MySQL\MySQL Workbench 8.0 CE\MySQLWorkbench.exe"
-  $path2 = Join-Path $env:ProgramFiles "MySQL\MySQL Workbench 8.0\MySQLWorkbench.exe"
-
-  if ((Test-Path $path1) -or (Test-Path $path2)) { return $true }
-  return Test-WingetPackage "Oracle.MySQLWorkbench"
 }
 
 if (-not (Test-Command "winget")) {
@@ -53,16 +34,6 @@ $packages = @(
     Check = { (Test-Command "node") -or (Test-WingetPackage "OpenJS.NodeJS.LTS") }
   },
   @{
-    Id = "Oracle.MySQL"
-    Name = "MySQL Server / Installer"
-    Check = { Test-MySQLServer }
-  },
-  @{
-    Id = "Oracle.MySQLWorkbench"
-    Name = "MySQL Workbench"
-    Check = { Test-MySQLWorkbench }
-  },
-  @{
     Id = "Microsoft.VisualStudioCode"
     Name = "Visual Studio Code"
     Check = { (Test-Command "code") -or (Test-WingetPackage "Microsoft.VisualStudioCode") }
@@ -75,6 +46,7 @@ $failed = 0
 
 Write-Host ""
 Write-Host "=== SAGC · Verificación e instalación ===" -ForegroundColor Cyan
+Write-Host "Base de datos: Supabase + PostgreSQL (remoto)" -ForegroundColor Cyan
 Write-Host ""
 
 foreach ($package in $packages) {
@@ -88,7 +60,6 @@ foreach ($package in $packages) {
   }
 
   Write-Host "  [--] No está instalado. Instalando..." -ForegroundColor Yellow
-
   winget install --id $package.Id --exact --accept-package-agreements --accept-source-agreements --silent
   $exitCode = $LASTEXITCODE
 
@@ -98,7 +69,6 @@ foreach ($package in $packages) {
   }
   else {
     Write-Host "  [ERROR] Falló la instalación de $($package.Name)." -ForegroundColor Red
-    Write-Host "          Prueba manualmente: winget install --id $($package.Id) --exact" -ForegroundColor DarkYellow
     $failed++
   }
 
@@ -109,13 +79,18 @@ Write-Host ""
 Write-Host "========== RESUMEN ==========" -ForegroundColor Cyan
 Write-Host "Omitidos porque ya existían: $skipped" -ForegroundColor Green
 Write-Host "Instalados ahora:            $installedNow" -ForegroundColor Green
-Write-Host "Fallos:                      $failed" -ForegroundColor $(if ($failed -gt 0) { "Red" } else { "Green" })
+if ($failed -gt 0) {
+  Write-Host "Fallos:                      $failed" -ForegroundColor Red
+} else {
+  Write-Host "Fallos:                      0" -ForegroundColor Green
+}
 Write-Host "=============================" -ForegroundColor Cyan
 Write-Host ""
 
 if ($failed -gt 0) { exit 1 }
 
-Write-Host "Si se instaló algo nuevo, abre una terminal nueva para refrescar PATH." -ForegroundColor Yellow
+Write-Host "Supabase no requiere instalar un servidor de base de datos local." -ForegroundColor Cyan
 Write-Host "Después ejecuta dentro del repositorio:" -ForegroundColor Cyan
 Write-Host "  npm run setup:project"
+Write-Host "Luego configura SUPABASE_URL y SUPABASE_SECRET_KEY en server/.env."
 Write-Host ""
