@@ -526,7 +526,7 @@ El token debe continuar siendo generado en backend, único, impredecible y no ed
 
 SAGC validará las constancias mediante su registro persistido, folio, token/QR, cadena original y estado de emisión.
 
-La validación se apoyará en el registro almacenado en MySQL, el folio, el token/QR, la cadena original y el estado de la emisión.
+La validación se apoyará en el registro almacenado en Supabase/PostgreSQL, el folio, el token/QR, la cadena original y el estado de la emisión.
 
 ## 8.4 QR
 
@@ -868,46 +868,42 @@ respaldos con datos personales
 
 ## Actualmente implementado
 
-- React;
-- Vite;
-- CSS;
-- login visual;
-- usuario de prueba local;
-- carrusel de imágenes;
-- logo institucional;
-- CAPTCHA de interfaz;
+- React + Vite + CSS;
+- login visual y acceso de prototipo `demo/demo`;
+- carrusel de imágenes y estilo Liquid Glass;
 - workflow de GitHub Pages;
-- estructura inicial de API Node.js/Express;
-- conexión MySQL mediante `mysql2/promise`;
-- esquema MySQL v0.1;
-- catálogos iniciales;
-- usuario de aplicación MySQL documentado;
-- script de comprobación de conexión;
+- API Node.js/Express;
+- cliente backend `@supabase/supabase-js`;
+- esquema oficial PostgreSQL para Supabase;
+- RLS habilitado en las tablas SAGC;
+- acceso elevado limitado al backend mediante clave secreta;
+- endpoint de salud de Supabase/PostgreSQL;
+- validación de login contra `usuarios` en Supabase;
 - bootstrap de administrador con Argon2id;
-- guía completa para MySQL Workbench.
+- Folio Único SAGC V1;
+- función PostgreSQL atómica `asignar_siguiente_folio(date)`;
+- Cadena Original SAGC;
+- catálogos iniciales y smoke test PostgreSQL;
+- guía de instalación de Supabase/PostgreSQL.
 
 ## Aún por desarrollar
 
-- endpoints funcionales completos del backend;
-- integración del login React con la API;
-- lógica de negocio sobre la base de datos;
-- autenticación real;
-- administración;
-- eventos;
-- tipos de documento;
+- sesiones seguras de autenticación;
+- administración completa de usuarios;
+- CRUD de eventos;
+- tipos documentales desde interfaz;
 - editor de textos;
 - campos especiales;
 - plantillas persistentes;
 - importación XLSX;
 - revisión de datos;
-- contador de folios;
+- integración completa de folio + emisión;
 - metodología definitiva del token único;
-- integración de Cadena Original SAGC en el flujo de emisión;
-- generación de QR;
+- generación del QR;
 - motor PDF;
 - ZIP;
-- validador;
-- auditoría.
+- validador público;
+- auditoría funcional.
 
 ---
 
@@ -930,18 +926,18 @@ respaldos con datos personales
 - [ ] Definir tipos documentales
 - [ ] Definir formato XLSX
 - [ ] Definir política de plantillas
-- [x] **Definir metodología de Cadena Original SAGC V2**
+- [x] **Definir metodología de Cadena Original SAGC**
 - [ ] Definir metodología del token único
 - [x] Definir metodología Folio Único SAGC V1
 - [ ] Definir qué datos serán públicos
 
 ## Fase 2 — Backend y autenticación
 
-- [ ] Tecnología backend
-- [ ] Base de datos
-- [ ] Migraciones
-- [ ] Usuarios
-- [ ] Argon2id
+- [x] Tecnología backend: Node.js + Express
+- [x] Base de datos: Supabase + PostgreSQL
+- [x] Estructura de migraciones PostgreSQL
+- [x] Esquema de usuarios
+- [x] Argon2id
 - [ ] Login real
 - [ ] Sesiones
 - [ ] Roles
@@ -1096,377 +1092,158 @@ El MVP deberá demostrar de extremo a extremo:
 
 # 20. Instalación completa y trabajo local
 
-Esta sección explica cómo preparar **todo SAGC desde cero** en una computadora nueva.
-
-El flujo esperado es:
+La arquitectura oficial de SAGC es:
 
 ```text
 GitHub
-  ↓ clone
-Repositorio local
   ↓
-Frontend React/Vite
-  +
-Backend Node/Express
-  +
-MySQL Server
-  +
-MySQL Workbench
+React / Vite
+  ↓ HTTP / JSON
+Node.js / Express
+  ↓ @supabase/supabase-js
+Supabase
   ↓
-Desarrollo local
-  ↓
-Pruebas
-  ↓
-Commit
-  ↓
-Push
-  ↓
-Pull Request
-  ↓
-main
+PostgreSQL
 ```
 
+No se requiere instalar MySQL Server ni un servidor PostgreSQL local para el flujo normal de desarrollo.
+
 > [!IMPORTANT]
-> El repositorio debe mantenerse **privado durante el desarrollo interno**. No subir contraseñas, archivos `.env`, dumps con datos reales ni credenciales de MySQL.
+> La clave secreta de Supabase es exclusiva del backend. Nunca debe colocarse en React, variables `VITE_*`, GitHub Pages ni archivos versionados.
 
 ---
 
-## 20.1 Requisitos e instalación desde consola
-
-SAGC necesita:
+## 20.1 Requisitos
 
 - Git;
 - Node.js 20 o superior;
 - npm;
-- MySQL Server 8.x;
-- MySQL Workbench;
-- un editor como Visual Studio Code.
+- un editor como Visual Studio Code;
+- acceso al proyecto Supabase de SAGC.
 
-### Windows 10/11 — PowerShell + winget
+### Windows
 
-Abrir **PowerShell como administrador** y ejecutar:
-
-```powershell
-winget install --exact --id Git.Git --accept-package-agreements --accept-source-agreements
-winget install --exact --id OpenJS.NodeJS.LTS --accept-package-agreements --accept-source-agreements
-winget install --exact --id Oracle.MySQL --accept-package-agreements --accept-source-agreements
-winget install --exact --id Oracle.MySQLWorkbench --accept-package-agreements --accept-source-agreements
-winget install --exact --id Microsoft.VisualStudioCode --accept-package-agreements --accept-source-agreements
-```
-
-Después cerrar y volver a abrir PowerShell para refrescar `PATH`.
-
-El repositorio también incluye un instalador inteligente:
+El repositorio incluye:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
 .\scripts\setup-windows.ps1
 ```
 
-Antes de instalar cada herramienta, el script comprueba si ya existe:
+El script comprueba e instala únicamente lo que falte:
 
 ```text
-COMPROBAR
-   ↓
-¿YA ESTÁ INSTALADA?
-   ├── SÍ → OMITIR
-   └── NO → INSTALAR → VERIFICAR
+Git
+Node.js LTS
+Visual Studio Code
 ```
 
-Por tanto, volver a ejecutar el script no debería reinstalar Git, Node.js, MySQL, Workbench o VS Code si ya están detectados.
+Supabase/PostgreSQL es remoto y no requiere instalar MySQL o Workbench.
 
-> [!NOTE]
-> Ese script se usa después de tener una copia del repositorio. Para una computadora completamente nueva, primero instala Git con `winget`, clona el repo y después puedes ejecutar el script.
-
-### macOS — Homebrew
-
-Si Homebrew todavía no está instalado:
-
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-Después:
+### macOS
 
 ```bash
 brew update
-brew install git node mysql
-brew install --cask mysqlworkbench
+brew install git node
 brew install --cask visual-studio-code
-brew services start mysql
 ```
 
 ### Ubuntu / Debian
 
 ```bash
 sudo apt update
-sudo apt install -y git curl build-essential mysql-server
+sudo apt install -y git curl build-essential
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs
-sudo systemctl enable --now mysql
 ```
 
-Para MySQL Workbench:
-
-```bash
-sudo apt install -y mysql-workbench
-```
-
-Si la distribución no ofrece ese paquete en sus repositorios, instalar la versión oficial disponible para esa distribución y conservar MySQL Server funcionando localmente.
-
-### Verificar herramientas
+### Verificar
 
 ```bash
 git --version
 node --version
 npm --version
-mysql --version
-```
-
-En Windows también puede comprobarse:
-
-```powershell
-winget list Git.Git
-winget list OpenJS.NodeJS.LTS
-winget list Oracle.MySQL
-winget list Oracle.MySQLWorkbench
-```
-
-El servidor MySQL local deberá quedar disponible normalmente en:
-
-```text
-127.0.0.1:3306
 ```
 
 ---
 
-## 20.2 Clonar el repositorio
-
-Desde la carpeta donde se quiera guardar el proyecto:
+## 20.2 Clonar
 
 ```bash
 git clone https://github.com/gio-canto/Sistema-automatizado-de-gesti-n-de-constancias-SAGC-.git
-```
-
-Entrar al proyecto:
-
-```bash
 cd Sistema-automatizado-de-gesti-n-de-constancias-SAGC-
 ```
 
-Comprobar el remoto:
-
-```bash
-git remote -v
-```
-
-Debe apuntar al repositorio oficial de SAGC.
-
-### Si el repositorio está privado
-
-GitHub puede solicitar autenticación.
-
-Opciones recomendadas:
-
-- iniciar sesión mediante Git Credential Manager;
-- usar GitHub Desktop;
-- usar una clave SSH configurada;
-- usar un Personal Access Token cuando corresponda.
-
-Nunca escribir un token dentro del código o README.
-
 ---
 
-## 20.3 Instalar todo el proyecto desde consola
-
-Una vez clonado el repositorio y con Node.js instalado, desde la raíz puede prepararse frontend + backend con un solo comando:
+## 20.3 Instalar frontend y backend
 
 ```bash
 npm run setup:project
 ```
 
-Este comando:
+El comando comprueba las dependencias existentes y solo instala cuando hace falta.
 
-1. verifica que Node.js sea 20 o superior;
-2. comprueba si `node_modules/` del frontend ya existe;
-3. si existe, omite la instalación; si falta, ejecuta `npm install`;
-4. comprueba si `server/node_modules/` ya existe;
-5. si existe, omite la instalación; si falta, instala el backend;
-6. comprueba si `server/.env` ya existe;
-7. si existe, lo conserva; si falta, lo crea desde `server/.env.example`.
+Backend actual:
 
 ```text
-Frontend instalado?  sí → omitir
-                     no → instalar
-
-Backend instalado?   sí → omitir
-                     no → instalar
-
-server/.env existe?  sí → conservar
-                     no → crear
-```
-
-El script utilizado está en:
-
-```text
-scripts/bootstrap-dev.mjs
-```
-
-### Instalación manual equivalente
-
-Frontend:
-
-```bash
-npm install
-```
-
-Backend:
-
-```bash
-npm run server:install
-```
-
-El backend instala actualmente:
-
-- Express;
-- mysql2;
-- Argon2;
-- dotenv;
-- cors;
-- helmet.
-
----
-
-## 20.5 Preparar MySQL con Workbench
-
-Abrir **MySQL Workbench**.
-
-Crear una conexión local:
-
-```text
-Connection Name: SAGC Local
-Hostname: 127.0.0.1
-Port: 3306
-Username: root
-```
-
-Usar la contraseña configurada durante la instalación de MySQL Server.
-
-### Crear la base oficial SAGC
-
-La base oficial ya corregida se encuentra en:
-
-```text
-database/Dump20260908.sql
-```
-
-Ese archivo **ya contiene la estructura planeada** y sustituye el modelo preliminar que se había generado inicialmente en Workbench.
-
-Para una instalación limpia, ejecutarlo completo:
-
-```text
-database/Dump20260908.sql
-```
-
-Después puede ejecutarse:
-
-```text
-database/004_smoke_test.sql
-```
-
-para comprobar tablas, relaciones y contador de folios.
-
-> [!CAUTION]
-> El dump oficial reconstruye las tablas del esquema `sagc`. Si existe información que deba conservarse, hacer un respaldo antes de ejecutarlo.
-
-Esto prepara:
-
-```text
-sagc
-├── usuarios
-├── tipos_documento
-├── eventos
-├── campos_evento
-├── plantillas
-├── contador_folios
-├── constancias
-└── auditoria
-```
-
-Guía ampliada:
-
-**[`docs/MYSQL_WORKBENCH.md`](./docs/MYSQL_WORKBENCH.md)**
-
-### Crear la base también desde consola
-
-Si el comando `mysql` está disponible en `PATH`, no es obligatorio abrir Workbench para inicializar la base.
-
-Desde la raíz del repositorio:
-
-```bash
-mysql -u root -p -e "SOURCE database/Dump20260908.sql;"
-mysql -u root -p -e "SOURCE database/004_smoke_test.sql;"
-```
-
-MySQL solicitará la contraseña de `root`.
-
-Comprobar:
-
-```bash
-mysql -u root -p -e "USE sagc; SHOW TABLES;"
-```
-
-Workbench puede seguir utilizándose para:
-
-- inspeccionar tablas;
-- ejecutar consultas;
-- visualizar relaciones;
-- generar el diagrama EER;
-- revisar datos durante desarrollo.
-
----
-
-## 20.6 Crear el usuario MySQL de SAGC
-
-No se debe conectar la API usando `root`.
-
-Abrir:
-
-```text
-database/003_create_app_user.example.sql
-```
-
-Copiar sus sentencias a una nueva pestaña de Workbench y cambiar:
-
-```text
-CAMBIAR_CONTRASENA_LOCAL
-```
-
-por una contraseña local segura.
-
-El usuario esperado será:
-
-```text
-sagc_app@127.0.0.1
+Express
+@supabase/supabase-js
+Argon2
+dotenv
+cors
+helmet
 ```
 
 ---
 
-## 20.7 Crear el archivo de configuración local
+## 20.4 Crear/configurar el proyecto Supabase
 
-El repositorio incluye:
+En el proyecto Supabase asignado a SAGC:
+
+1. abrir **SQL Editor**;
+2. ejecutar `database/schema.sql`;
+3. ejecutar `database/002_seed_catalogos.sql`;
+4. ejecutar `database/004_smoke_test.sql`.
+
+El esquema utiliza PostgreSQL nativo y crea:
 
 ```text
-server/.env.example
+usuarios
+tipos_documento
+eventos
+textos_evento
+campos_evento
+plantillas
+contador_folios
+constancias
+auditoria
 ```
 
-Hay que crear una copia llamada:
+Además crea:
+
+```text
+sagc_healthcheck()
+asignar_siguiente_folio(date)
+```
+
+Guía completa:
+
+**[`docs/SUPABASE_POSTGRES.md`](./docs/SUPABASE_POSTGRES.md)**
+
+---
+
+## 20.5 Configurar credenciales del backend
+
+Crear:
 
 ```text
 server/.env
 ```
 
-### Windows PowerShell
+desde el ejemplo:
+
+### Windows
 
 ```powershell
 Copy-Item server/.env.example server/.env
@@ -1478,366 +1255,177 @@ Copy-Item server/.env.example server/.env
 cp server/.env.example server/.env
 ```
 
-Editar después:
+Configurar:
 
 ```dotenv
 NODE_ENV=development
 PORT=3001
 CORS_ORIGIN=http://localhost:5173
 
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_NAME=sagc
-DB_USER=sagc_app
-DB_PASSWORD=TU_CONTRASENA_LOCAL
-DB_CONNECTION_LIMIT=10
+SUPABASE_URL=https://TU_PROJECT_REF.supabase.co
+SUPABASE_SECRET_KEY=sb_secret_TU_CLAVE_REAL
 ```
 
-> [!CAUTION]
-> `server/.env` está ignorado por Git. Nunca debe subirse.
+La clave secreta se obtiene desde el proyecto Supabase y no debe subirse a Git.
 
 ---
 
-## 20.8 Probar MySQL antes de arrancar SAGC
-
-Desde la raíz:
+## 20.6 Probar Supabase/PostgreSQL
 
 ```bash
 npm run db:check
 ```
 
-La salida correcta debe indicar:
+Resultado esperado:
 
 ```text
-Conexión MySQL correcta.
+Conexión Supabase/PostgreSQL correcta.
 ```
 
-También puede probarse desde Workbench ejecutando:
+También:
 
 ```text
-database/004_smoke_test.sql
+http://localhost:3001/api/health
+http://localhost:3001/api/health/db
 ```
 
 ---
 
-## 20.9 Crear el primer administrador de desarrollo
+## 20.7 Crear el primer administrador de desarrollo
 
-Configurar temporalmente en:
-
-```text
-server/.env
-```
-
-estas variables:
+En `server/.env`:
 
 ```dotenv
 SAGC_BOOTSTRAP_ADMIN_NAME=Administrador SAGC
 SAGC_BOOTSTRAP_ADMIN_USER=admin
-SAGC_BOOTSTRAP_ADMIN_PASSWORD=UNA_CONTRASENA_LOCAL_DE_12_O_MAS_CARACTERES
+SAGC_BOOTSTRAP_ADMIN_PASSWORD=UNA_CONTRASENA_DE_12_O_MAS_CARACTERES
 ```
 
-Después:
+Ejecutar:
 
 ```bash
 npm run db:bootstrap-admin
 ```
 
-El backend guardará únicamente un hash **Argon2id** en MySQL.
+La contraseña se transforma con Argon2id en el backend antes de guardarse en `usuarios.password_hash`.
+
+Este mecanismo es independiente de Supabase Auth; por ahora SAGC conserva su autenticación propia.
 
 ---
 
-## 20.10 Lanzar SAGC completo con un solo comando
-
-La forma recomendada de iniciar el proyecto local es:
+## 20.8 Lanzar SAGC
 
 ```bash
 npm start
-```
-
-También puede utilizarse:
-
-```bash
-npm run start:local
 ```
 
 El lanzador:
 
-1. comprueba que existan las dependencias del frontend y backend;
-2. inicia Express;
-3. inicia Vite en `127.0.0.1:5173`;
-4. fuerza el puerto 5173 para evitar cambios silenciosos a 5174/5175;
-5. espera hasta 30 segundos a que Vite responda realmente;
-6. solo cuando la página está lista abre el navegador;
-7. comprueba el endpoint de salud del backend;
-8. si MySQL/backend falla, permite que el frontend siga disponible para `demo / demo`.
+1. inicia Express en `127.0.0.1:3001`;
+2. inicia Vite en `127.0.0.1:5173`;
+3. espera a que Vite responda;
+4. abre el navegador;
+5. comprueba que el backend responda.
 
-```text
-npm start
-   ↓
-Backend :3001
-   +
-Vite :5173
-   ↓
-esperar respuesta HTTP real
-   ↓
-abrir navegador
-```
-
-Si faltan dependencias, ejecutar primero:
-
-```bash
-npm run setup:project
-```
-
-### Arranque manual del backend
-
-```bash
-npm run server:dev
-```
-
-Backend:
-
-```text
-http://127.0.0.1:3001
-```
-
-Pruebas rápidas:
-
-```text
-http://127.0.0.1:3001/api/health
-http://127.0.0.1:3001/api/health/db
-```
+Si Supabase todavía no está configurado, el acceso estático `demo/demo` continúa disponible para el prototipo.
 
 ---
 
-## 20.11 Arranque manual del frontend
+## 20.9 Accesos durante desarrollo
 
-Si se desea ejecutar solamente Vite:
-
-```bash
-npm run dev
-```
-
-Frontend:
-
-```text
-http://localhost:5173
-```
-
-En desarrollo Vite redirige automáticamente:
-
-```text
-/api
-   ↓
-http://localhost:3001
-```
-
-Por eso React no necesita conocer directamente las credenciales de MySQL.
-
----
-
-## 20.12 Accesos durante desarrollo
-
-El frontend conserva temporalmente:
+Prototipo estático:
 
 ```text
 Usuario: demo
 Contraseña: demo
 ```
 
-para la demostración estática.
-
-Cuando backend + MySQL están activos, también puede utilizarse un usuario real creado en la tabla:
+Usuario real de desarrollo:
 
 ```text
-usuarios
+React
+ ↓
+POST /api/auth/login
+ ↓
+Express
+ ↓
+Supabase
+ ↓
+public.usuarios
 ```
 
-por ejemplo el administrador creado con:
+GitHub Pages no ejecuta Express, por lo que el acceso real a Supabase requiere desplegar también el backend.
 
-```bash
-npm run db:bootstrap-admin
+---
+
+## 20.10 Seguridad de Supabase
+
+El esquema base habilita RLS y no concede acceso directo a las tablas a `anon` o `authenticated` durante esta etapa.
+
+La clave secreta:
+
+```text
+SUPABASE_SECRET_KEY
+```
+
+solo puede vivir en infraestructura controlada del backend.
+
+No subir:
+
+```text
+server/.env
+sb_secret_...
+contraseñas
+tokens privados
+respaldos con datos personales
 ```
 
 ---
 
-## 20.13 Cómo trabajar cada día
-
-Antes de empezar:
+## 20.11 Flujo diario de Git
 
 ```bash
 git checkout main
 git pull origin main
-```
-
-Después crear una rama para la tarea:
-
-```bash
 git checkout -b feature/nombre-de-la-funcion
 ```
 
-Ejemplos:
-
-```bash
-git checkout -b feature/admin-users
-git checkout -b feature/events
-git checkout -b feature/templates
-git checkout -b feature/mass-import
-git checkout -b feature/public-validator
-```
-
-Evitar desarrollar funcionalidades grandes directamente sobre `main`.
-
----
-
-## 20.14 Ver qué se modificó
-
-Durante el trabajo:
-
-```bash
-git status
-```
-
-Para revisar diferencias:
-
-```bash
-git diff
-```
-
-Para revisar archivos ya preparados:
-
-```bash
-git diff --staged
-```
-
----
-
-## 20.15 Probar antes de subir
-
-Frontend:
+Antes de subir:
 
 ```bash
 npm run build
-```
-
-Backend/MySQL:
-
-```bash
 npm run db:check
-```
-
-Si se modificó el backend:
-
-```bash
-npm run server:dev
-```
-
-y verificar manualmente los endpoints afectados.
-
-No subir una rama que rompa:
-
-- compilación;
-- login;
-- conexión de desarrollo;
-- esquema SQL;
-- GitHub Pages.
-
----
-
-## 20.16 Guardar cambios localmente con Git
-
-Agregar cambios:
-
-```bash
-git add .
-```
-
-Crear commit:
-
-```bash
-git commit -m "Descripción breve del cambio"
-```
-
-Ejemplos:
-
-```bash
-git commit -m "Add event management API"
-git commit -m "Fix certificate template preview"
-git commit -m "Add user administration screen"
-```
-
----
-
-## 20.17 Subir una rama a GitHub
-
-La primera vez:
-
-```bash
-git push -u origin feature/nombre-de-la-funcion
+npm run folio:test
+npm run chain:test
+git status
+git diff
 ```
 
 Después:
 
 ```bash
-git push
+git add .
+git commit -m "Descripción breve del cambio"
+git push -u origin feature/nombre-de-la-funcion
 ```
 
-Esto **sube el trabajo local a GitHub**, pero todavía no lo integra a `main`.
+Crear Pull Request y revisar código, SQL PostgreSQL, secretos, build y funcionamiento del backend.
 
 ---
 
-## 20.18 Crear Pull Request
+## 20.12 Base de datos y migraciones
 
-En GitHub:
+Fuente de verdad:
 
 ```text
-Repositorio
-→ Pull requests
-→ New pull request
-→ base: main
-→ compare: feature/nombre-de-la-funcion
+database/schema.sql
 ```
 
-Antes de fusionar revisar:
+Cambios posteriores:
 
-- cambios de código;
-- SQL;
-- archivos accidentales;
-- secretos;
-- `.env`;
-- funcionamiento del frontend;
-- funcionamiento del backend;
-- build;
-- documentación.
-
----
-
-## 20.19 Actualizar una rama con los cambios más recientes
-
-Si `main` cambió mientras se trabaja:
-
-```bash
-git checkout main
-git pull origin main
-git checkout feature/nombre-de-la-funcion
-git merge main
+```text
+database/migrations/
 ```
 
-Resolver conflictos si aparecen y volver a probar.
+No volver a agregar SQL específico de MySQL.
 
----
-
-## 20.20 Después de fusionar una rama
-
-Volver a `main`:
-
-```bash
-git checkout main
-git pull origin main
-```
-
-Eliminar rama local si ya no se necesita:
-
-```bash
-git branch -d feature/nombre-de-la-funcion
-```
