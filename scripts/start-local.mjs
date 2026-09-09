@@ -98,7 +98,7 @@ console.log('');
 
 if (!existsSync(envFile)) {
   console.warn('[AVISO] server/.env no existe.');
-  console.warn('        demo/demo podrá funcionar, pero MySQL no estará disponible.');
+  console.warn('        demo/demo podrá funcionar, pero Supabase no estará disponible.');
 }
 
 const backend = spawnProcess('backend', 'npm', ['run', 'dev'], serverDir);
