@@ -1,41 +1,68 @@
-USE sagc;
+-- SAGC · Smoke test PostgreSQL / Supabase
 
-SELECT DATABASE() AS base_actual, VERSION() AS version_mysql;
+select
+  current_database() as base_actual,
+  current_schema() as esquema_actual,
+  version() as version_postgresql,
+  now() as hora_servidor;
 
-SHOW TABLES;
+select public.sagc_healthcheck() as sagc_healthcheck;
 
-SELECT * FROM tipos_documento ORDER BY id_tipo_documento;
+select
+  table_name
+from information_schema.tables
+where table_schema = 'public'
+  and table_name in (
+    'usuarios',
+    'tipos_documento',
+    'eventos',
+    'textos_evento',
+    'campos_evento',
+    'plantillas',
+    'contador_folios',
+    'constancias',
+    'auditoria'
+  )
+order by table_name;
 
-SELECT
+select
+  id_tipo_documento,
+  clave,
+  nombre,
+  activo
+from public.tipos_documento
+order by id_tipo_documento;
+
+select
   anio,
   serie,
   ultimo_valor,
-  CASE
-    WHEN ultimo_valor = 0 THEN CONCAT(anio, '-', serie, '-0001')
-    WHEN ultimo_valor < 9999 THEN CONCAT(
-      anio, '-', serie, '-', LPAD(ultimo_valor + 1, 4, '0')
-    )
-    WHEN serie < 'Z' THEN CONCAT(
-      anio, '-', CHAR(ASCII(serie) + 1), '-0001'
-    )
-    ELSE 'FOLIOS_AGOTADOS'
-  END AS siguiente_folio_estimado
-FROM contador_folios
-ORDER BY anio DESC;
+  case
+    when ultimo_valor < 9999 then
+      concat(anio, '-', serie, '-', lpad((ultimo_valor + 1)::text, 4, '0'))
+    when serie < 'Z' then
+      concat(anio, '-', chr(ascii(serie) + 1), '-0001')
+    else
+      'FOLIOS_AGOTADOS'
+  end as siguiente_folio_estimado
+from public.contador_folios
+order by anio desc;
 
-SELECT
-  TABLE_NAME,
-  TABLE_ROWS,
-  ENGINE,
-  TABLE_COLLATION
-FROM information_schema.TABLES
-WHERE TABLE_SCHEMA = 'sagc'
-ORDER BY TABLE_NAME;
-
-SELECT
-  CONSTRAINT_NAME,
-  TABLE_NAME,
-  REFERENCED_TABLE_NAME
-FROM information_schema.REFERENTIAL_CONSTRAINTS
-WHERE CONSTRAINT_SCHEMA = 'sagc'
-ORDER BY TABLE_NAME, CONSTRAINT_NAME;
+select
+  tc.table_name,
+  tc.constraint_name,
+  tc.constraint_type
+from information_schema.table_constraints tc
+where tc.table_schema = 'public'
+  and tc.table_name in (
+    'usuarios',
+    'tipos_documento',
+    'eventos',
+    'textos_evento',
+    'campos_evento',
+    'plantillas',
+    'contador_folios',
+    'constancias',
+    'auditoria'
+  )
+order by tc.table_name, tc.constraint_type, tc.constraint_name;
