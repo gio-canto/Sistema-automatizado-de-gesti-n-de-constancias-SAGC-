@@ -13,7 +13,7 @@ Esta carpeta queda reservada únicamente para cambios posteriores al esquema bas
 Convención:
 
 ```text
-001_nombre_del_cambio.sql
+001_token_uuid_v4.sql
 002_nombre_del_cambio.sql
 003_nombre_del_cambio.sql
 ```
