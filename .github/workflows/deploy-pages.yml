@@ -4,12 +4,6 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-  # GitHub Pages sigue teniendo activo el despliegue heredado por rama.
-  # Cuando ese proceso Jekyll termina, vuelve a desplegar el build correcto
-  # de Vite para evitar que el sitio quede sobrescrito con los archivos fuente.
-  workflow_run:
-    workflows: ["pages build and deployment"]
-    types: [completed]
 
 permissions:
   contents: read
@@ -22,9 +16,6 @@ concurrency:
 
 jobs:
   build:
-    if: >-
-      github.event_name != 'workflow_run' ||
-      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -43,6 +34,16 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Verify Vite production bundle
+        run: |
+          test -f dist/index.html
+          test -d dist/assets
+          if grep -q 'main.jsx' dist/index.html; then
+            echo 'ERROR: dist/index.html todavía referencia main.jsx'
+            exit 1
+          fi
+          grep -q '/Sistema-automatizado-de-gesti-n-de-constancias-SAGC-/assets/' dist/index.html
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:
@@ -60,6 +61,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Deploy to GitHub Pages
+      # El repositorio todavía tiene activo el Pages heredado por rama/Jekyll.
+      # Ese despliegue suele terminar ~40-50 s después del push y puede pisar
+      # el dist de Vite. Esperamos deliberadamente para publicar Vite al final.
+      - name: Wait for legacy Pages deployment
+        run: sleep 90
+
+      - name: Deploy Vite bundle to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
