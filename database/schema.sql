@@ -291,7 +291,8 @@ create table if not exists public.constancias (
   folio varchar(11) not null unique
     check (folio ~ '^[0-9]{4}-[A-Z]-[0-9]{4}$')
     check (right(folio, 4)::integer between 1 and 9999),
-  token_unico varchar(160) not null unique,
+  -- Token Único SAGC V1 · UUID versión 4 (RFC 9562)
+  token_unico uuid not null unique,
   cadena_validacion text not null,
   qr_destino text not null,
   fecha_emision timestamptz not null default now(),
