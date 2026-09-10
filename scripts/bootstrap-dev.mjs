@@ -1,25 +1,13 @@
-import { copyFileSync, existsSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const __filename = fileURLToPath(import.meta.url);
 const root = path.resolve(path.dirname(__filename), '..');
+const server = path.join(root, 'server');
 
-function run(command, args, cwd) {
-  console.log('\n> ' + command + ' ' + args.join(' '));
-  const result = spawnSync(command, args, {
-    cwd,
-    stdio: 'inherit',
-    shell: process.platform === 'win32',
-  });
-
-  if (result.status !== 0) {
-    process.exit(result.status ?? 1);
-  }
-}
-
-function dependenciesAreHealthy(directory) {
+function npmDependenciesAreHealthy(directory) {
   if (!existsSync(path.join(directory, 'node_modules'))) {
     return false;
   }
@@ -33,62 +21,76 @@ function dependenciesAreHealthy(directory) {
   return result.status === 0;
 }
 
-function ensureDependencies(label, directory) {
-  console.log('[--] ' + label + ': comprobando dependencias...');
-
-  if (dependenciesAreHealthy(directory)) {
-    console.log(
-      '[OK] ' + label + ': dependencias completas y compatibles; se omite npm install.'
-    );
-    return;
-  }
-
-  console.log(
-    '[--] ' + label + ': faltan dependencias o cambió package.json; ejecutando npm install...'
-  );
-  run('npm', ['install'], directory);
-
-  if (!dependenciesAreHealthy(directory)) {
-    console.error(
-      '[ERROR] ' + label + ': npm install terminó, pero las dependencias siguen incompletas.'
-    );
-    process.exit(1);
-  }
-
-  console.log('[OK] ' + label + ': dependencias actualizadas.');
+function showNpmProblem(directory) {
+  spawnSync('npm', ['ls', '--depth=0'], {
+    cwd: directory,
+    stdio: 'inherit',
+    shell: process.platform === 'win32',
+  });
 }
 
-const major = Number(process.versions.node.split('.')[0]);
+function checkDependencies(label, directory, installCommand) {
+  console.log(`[--] ${label}: comprobando dependencias...`);
 
-if (major < 20) {
+  if (npmDependenciesAreHealthy(directory)) {
+    console.log(`[OK] ${label}: dependencias correctas.`);
+    return true;
+  }
+
+  console.error(`\n[ERROR] ${label}: las dependencias no están completas o son incompatibles.`);
+
+  if (!existsSync(path.join(directory, 'node_modules'))) {
+    console.error('        No existe node_modules.');
+  } else {
+    console.error('        Detalle original de npm:');
+    showNpmProblem(directory);
+  }
+
+  console.error(`        No se realizará ninguna reinstalación automática.`);
+  console.error(`        Cuando quieras corregirlo manualmente ejecuta: ${installCommand}\n`);
+  return false;
+}
+
+const nodeMajor = Number(process.versions.node.split('.')[0]);
+
+console.log('');
+console.log('=== SAGC · Diagnóstico del proyecto ===');
+console.log(`Node.js detectado: ${process.version}`);
+
+if (nodeMajor < 20) {
   console.error(
-    'SAGC requiere Node.js 20 o superior. Versión actual: ' + process.version
+    `[ERROR] SAGC requiere Node.js 20 o superior. Versión actual: ${process.version}`
   );
   process.exit(1);
 }
 
-console.log('');
-console.log('=== SAGC · Preparación inteligente del proyecto ===');
-console.log('Node.js detectado: ' + process.version);
+const frontendOk = checkDependencies('Frontend', root, 'npm install');
+const backendOk = checkDependencies(
+  'Backend',
+  server,
+  'npm --prefix server install'
+);
 
-ensureDependencies('Frontend', root);
-ensureDependencies('Backend', path.join(root, 'server'));
-
-const envExample = path.join(root, 'server', '.env.example');
-const envFile = path.join(root, 'server', '.env');
+const envFile = path.join(server, '.env');
+let envOk = true;
 
 if (existsSync(envFile)) {
-  console.log('[OK] server/.env ya existe; se conserva y se omite su creación.');
+  console.log('[OK] Backend: server/.env existe.');
 } else {
-  copyFileSync(envExample, envFile);
-  console.log('[OK] server/.env creado desde server/.env.example.');
-  console.log(
-    '     Edita SUPABASE_URL y SUPABASE_SECRET_KEY antes de iniciar el backend.'
+  envOk = false;
+  console.error('[ERROR] Backend: falta server/.env.');
+  console.error('        El diagnóstico no lo creará automáticamente.');
+  console.error(
+    '        Créalo manualmente a partir de server/.env.example y configura Supabase.\n'
   );
 }
 
 console.log('');
-console.log('Preparación terminada.');
-console.log(
-  'Siguiente paso: configurar Supabase en server/.env y ejecutar npm run db:check.'
-);
+
+if (!frontendOk || !backendOk || !envOk) {
+  console.error('Diagnóstico terminado con problemas. No se modificó ningún archivo ni dependencia.');
+  process.exit(1);
+}
+
+console.log('Diagnóstico correcto. No se instaló ni modificó nada.');
+console.log('Puedes continuar con npm start.');
