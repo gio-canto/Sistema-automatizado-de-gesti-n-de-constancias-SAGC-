@@ -167,7 +167,43 @@ supabase.rpc(...)
 
 Así PostgreSQL controla el bloqueo y el incremento del contador.
 
-## 10. Flujo local
+## 10. Token Único SAGC
+
+El token oficial utiliza **UUID versión 4**.
+
+```text
+7f0c55ca-3ac5-49a0-8b86-98dd96cef072
+```
+
+PostgreSQL almacena:
+
+```sql
+token_unico uuid not null unique
+```
+
+y el esquema valida específicamente que el UUID corresponda a versión 4.
+
+El backend genera el valor con:
+
+```js
+crypto.randomUUID()
+```
+
+Metodología completa:
+
+```text
+docs/METODOLOGIA_TOKEN_UNICO.md
+```
+
+Prueba:
+
+```bash
+npm run token:test
+```
+
+---
+
+## 11. Flujo local
 
 ```bash
 git pull origin main
@@ -178,7 +214,7 @@ npm start
 
 No se necesita una instancia local de PostgreSQL para el flujo normal; el backend de desarrollo usa el proyecto Supabase configurado en `server/.env`.
 
-## 11. Cambios de esquema
+## 12. Cambios de esquema
 
 No editar manualmente producción sin registrar el cambio.
 
