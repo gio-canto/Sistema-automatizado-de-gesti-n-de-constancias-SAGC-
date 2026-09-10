@@ -15,7 +15,8 @@
     "start": "node scripts/start-local.mjs",
     "start:local": "node scripts/start-local.mjs",
     "folio:test": "npm --prefix server run folio:test",
-    "chain:test": "npm --prefix server run chain:test"
+    "chain:test": "npm --prefix server run chain:test",
+    "token:test": "npm --prefix server run token:test"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
