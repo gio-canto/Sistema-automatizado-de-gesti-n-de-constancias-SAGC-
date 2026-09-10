@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import AccessGranted from './components/AccessGranted.jsx';
-import LoginBackground from './components/LoginBackground.jsx';
-import LoginForm from './components/LoginForm.jsx';
+import AccessGrantedPage from './pages/AccessGrantedPage.jsx';
+import LoginPage from './pages/LoginPage.jsx';
 
 export default function App() {
   const [authenticatedUser, setAuthenticatedUser] = useState(null);
@@ -11,13 +10,8 @@ export default function App() {
   }
 
   if (authenticatedUser) {
-    return <AccessGranted onLogout={logout} />;
+    return <AccessGrantedPage onLogout={logout} />;
   }
 
-  return (
-    <main className="auth-container">
-      <LoginBackground />
-      <LoginForm onAuthenticated={setAuthenticatedUser} />
-    </main>
-  );
+  return <LoginPage onAuthenticated={setAuthenticatedUser} />;
 }
