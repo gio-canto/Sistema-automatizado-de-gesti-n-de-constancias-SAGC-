@@ -388,22 +388,53 @@ Prueba:
 npm --prefix server run folio:test
 ```
 
-## Token único
+## Token Único SAGC V1
 
-El ejemplo visual incorpora un token individual por constancia.
+La metodología oficial está definida en:
 
-### Decisión propuesta
+**[`docs/METODOLOGIA_TOKEN_UNICO.md`](./docs/METODOLOGIA_TOKEN_UNICO.md)**
 
-El token:
+Estándar:
 
-- debe generarse en el servidor;
-- debe ser único;
-- debe ser impredecible;
-- no debe ser ingresado manualmente;
-- no debe derivarse solamente del nombre o del folio;
-- no debe poder editarse desde la pantalla del operador.
+```text
+UUID versión 4 · RFC 9562
+```
 
-Se recomienda evaluar un identificador generado mediante CSPRNG con suficiente entropía y codificación segura para URL.
+Formato canónico:
+
+```text
+xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+```
+
+Ejemplo:
+
+```text
+7f0c55ca-3ac5-49a0-8b86-98dd96cef072
+```
+
+Reglas principales:
+
+- generado exclusivamente en backend con `crypto.randomUUID()`;
+- representación canónica en minúsculas;
+- 36 caracteres en formato 8-4-4-4-12;
+- no contiene nombre, folio, fecha ni evento;
+- PostgreSQL lo almacena como tipo nativo `uuid`;
+- `UNIQUE` evita duplicados;
+- un token cancelado no se reutiliza;
+- una reexpedición recibe un UUIDv4 nuevo;
+- el QR utiliza el token como identificador de validación.
+
+Implementación:
+
+```text
+server/src/services/identifiers/token.js
+```
+
+Prueba:
+
+```bash
+npm run token:test
+```
 
 ## Cadena Original SAGC
 
@@ -420,7 +451,7 @@ FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|NOMBRE_EVENTO_NORMALIZADO|TOKEN_UN
 Ejemplo:
 
 ```text
-2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|XXX-FORO-DE-ESTUDIOS-SOBRE-GUERRERO|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
+2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|XXX-FORO-DE-ESTUDIOS-SOBRE-GUERRERO|7f0c55ca-3ac5-49a0-8b86-98dd96cef072
 ```
 
 La cadena:
@@ -470,7 +501,7 @@ token_unico
 - folio validado con formato `AAAA-X-XXXX`;
 - tipo documental obtenido de su `clave`;
 - evento de emisión obtenido del nombre almacenado en `eventos.nombre`;
-- token conservado sin alterar mayúsculas/minúsculas;
+- token UUIDv4 validado y canonicalizado a minúsculas;
 - escape de `%`, `|`, CR y LF;
 - máximo 1024 bytes;
 - generación únicamente server-side;
@@ -487,13 +518,13 @@ María José Muñoz López
 2026-09-08
 CONSTANCIA
 XXX Foro de Estudios sobre Guerrero
-8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
+7f0c55ca-3ac5-49a0-8b86-98dd96cef072
 ```
 
 Salida:
 
 ```text
-2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|XXX-FORO-DE-ESTUDIOS-SOBRE-GUERRERO|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
+2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|XXX-FORO-DE-ESTUDIOS-SOBRE-GUERRERO|7f0c55ca-3ac5-49a0-8b86-98dd96cef072
 ```
 
 Implementación de referencia:
@@ -508,19 +539,13 @@ Prueba ejecutable:
 npm --prefix server run chain:test
 ```
 
-## 8.2 Token único — pendiente de metodología propia
+## 8.2 Token Único SAGC V1 — definido
 
-La cadena vigente ya define **cómo consume** el token, pero todavía debe fijarse formalmente:
+La especificación normativa se encuentra en:
 
-- algoritmo de generación;
-- número de bits de entropía;
-- longitud;
-- alfabeto/codificación;
-- política ante colisiones;
-- exposición pública;
-- comportamiento institucional ante reexpedición.
+**[`docs/METODOLOGIA_TOKEN_UNICO.md`](./docs/METODOLOGIA_TOKEN_UNICO.md)**
 
-El token debe continuar siendo generado en backend, único, impredecible y no editable.
+SAGC utiliza UUIDv4 generado por el backend mediante `crypto.randomUUID()`, almacenado en PostgreSQL como `uuid NOT NULL UNIQUE` y validado como versión 4 antes de incorporarse a la Cadena Original.
 
 ## 8.3 Validación del registro
 
@@ -883,6 +908,8 @@ respaldos con datos personales
 - Folio Único SAGC V1;
 - función PostgreSQL atómica `asignar_siguiente_folio(date)`;
 - Cadena Original SAGC;
+- Token Único SAGC V1 con UUIDv4;
+- generador y validador UUIDv4 en backend;
 - catálogos iniciales y smoke test PostgreSQL;
 - guía de instalación de Supabase/PostgreSQL.
 
@@ -898,7 +925,6 @@ respaldos con datos personales
 - importación XLSX;
 - revisión de datos;
 - integración completa de folio + emisión;
-- metodología definitiva del token único;
 - generación del QR;
 - motor PDF;
 - ZIP;
@@ -927,7 +953,7 @@ respaldos con datos personales
 - [ ] Definir formato XLSX
 - [ ] Definir política de plantillas
 - [x] **Definir metodología de Cadena Original SAGC**
-- [ ] Definir metodología del token único
+- [x] Definir metodología Token Único SAGC V1 (UUIDv4)
 - [x] Definir metodología Folio Único SAGC V1
 - [ ] Definir qué datos serán públicos
 
@@ -973,7 +999,7 @@ respaldos con datos personales
 - [x] Metodología Folio Único SAGC V1
 - [x] Servicio transaccional de referencia del folio
 - [ ] Integrar asignación del folio en la transacción completa de emisión
-- [ ] Token
+- [x] Token Único SAGC V1 · UUIDv4
 - [x] Metodología Cadena Original SAGC
 - [x] Implementación de referencia y vector de prueba de cadena
 - [ ] Integrar cadena al flujo real de emisión
@@ -1054,8 +1080,8 @@ El MVP deberá demostrar de extremo a extremo:
 - [x] formato oficial de cadena sin prefijo de versión;
 - [x] versionado de cadena;
 - [x] reglas técnicas de cancelación/reexpedición de cadena;
-- [ ] metodología formal del token;
-- [ ] formato definitivo de token;
+- [x] metodología formal del token UUIDv4;
+- [x] formato definitivo de token UUIDv4;
 - [ ] URL institucional del QR;
 - [ ] aprobación del Consejo sobre la metodología;
 - [ ] datos mostrados al público.
