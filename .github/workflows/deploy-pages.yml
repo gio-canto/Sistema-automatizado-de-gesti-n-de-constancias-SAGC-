@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # GitHub Pages sigue teniendo activo el despliegue heredado por rama.
+  # Cuando ese proceso Jekyll termina, vuelve a desplegar el build correcto
+  # de Vite para evitar que el sitio quede sobrescrito con los archivos fuente.
+  workflow_run:
+    workflows: ["pages build and deployment"]
+    types: [completed]
 
 permissions:
   contents: read
@@ -11,15 +17,20 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-vite
   cancel-in-progress: true
 
 jobs:
   build:
+    if: >-
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Setup Node
         uses: actions/setup-node@v4
