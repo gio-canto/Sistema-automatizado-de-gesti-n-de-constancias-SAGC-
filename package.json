@@ -17,8 +17,6 @@
     "db:check": "npm --prefix server run db:check",
     "db:bootstrap-admin": "npm --prefix server run db:bootstrap-admin",
     "setup:project": "node scripts/bootstrap-dev.mjs",
-    "start": "node scripts/start-local.mjs",
-    "start:local": "node scripts/start-local.mjs",
     "folio:test": "npm --prefix server run folio:test",
     "chain:test": "npm --prefix server run chain:test",
     "token:test": "npm --prefix server run token:test"
