@@ -40,7 +40,7 @@ Orden obligatorio:
 Ejemplo:
 
 ```text
-2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|XXX-FORO-DE-ESTUDIOS-SOBRE-GUERRERO|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
+2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|XXX-FORO-DE-ESTUDIOS-SOBRE-GUERRERO|7f0c55ca-3ac5-49a0-8b86-98dd96cef072
 ```
 
 ---
@@ -225,14 +225,27 @@ PERSONALIZADO
 
 ## 10. Token único
 
-El token:
+SAGC utiliza **UUID versión 4** como Token Único.
 
-- es obligatorio;
-- se genera en backend;
-- no puede editarlo el operador;
-- se conserva en su forma original salvo espacios exteriores accidentales.
+Metodología oficial:
 
-Su metodología específica se documenta por separado.
+```text
+docs/METODOLOGIA_TOKEN_UNICO.md
+```
+
+Formato canónico:
+
+```text
+xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+```
+
+Ejemplo:
+
+```text
+7f0c55ca-3ac5-49a0-8b86-98dd96cef072
+```
+
+La cadena normaliza el UUID a minúsculas y valida que corresponda realmente a versión 4 antes de incorporarlo.
 
 ---
 
@@ -257,7 +270,7 @@ nombre_canon  = NORMALIZAR_NOMBRE(nombre_persona)
 fecha_canon   = NORMALIZAR_FECHA(fecha_emision)
 tipo_canon    = NORMALIZAR_TIPO(tipo_documento)
 evento_canon  = NORMALIZAR_NOMBRE_EVENTO(eventos.nombre)
-token_canon   = TRIM(token_unico)
+token_canon   = NORMALIZAR_UUID_V4(token_unico)
 
 VALIDAR año(folio) == año(fecha)
 
@@ -285,14 +298,14 @@ Entrada:
   "fecha_emision": "2026-09-08",
   "tipo_documento": "CONSTANCIA",
   "evento_emision": "XXX Foro de Estudios sobre Guerrero",
-  "token_unico": "8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10"
+  "token_unico": "7f0c55ca-3ac5-49a0-8b86-98dd96cef072"
 }
 ```
 
 Salida exacta:
 
 ```text
-2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|XXX-FORO-DE-ESTUDIOS-SOBRE-GUERRERO|8F3A7C21-D4E9-5B60-9A01-7E2C4B6D8F10
+2026-A-1380|MARIA-JOSE-MUNOZ-LOPEZ|2026-09-08|CONSTANCIA|XXX-FORO-DE-ESTUDIOS-SOBRE-GUERRERO|7f0c55ca-3ac5-49a0-8b86-98dd96cef072
 ```
 
 El vector de prueba se valida comparando directamente la cadena generada con la salida exacta esperada.
