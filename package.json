@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host localhost",
+    "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview --host localhost",
+    "preview": "vite preview",
     "server:dev": "npm --prefix server run dev",
     "db:check": "npm --prefix server run db:check",
     "db:bootstrap-admin": "npm --prefix server run db:bootstrap-admin",
