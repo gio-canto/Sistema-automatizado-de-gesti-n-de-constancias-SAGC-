@@ -115,6 +115,33 @@ realiza la reserva del siguiente folio dentro de PostgreSQL y bloquea la fila an
 
 El backend la invoca mediante `supabase.rpc()`.
 
+## Token Único SAGC V1
+
+Metodología:
+
+```text
+docs/METODOLOGIA_TOKEN_UNICO.md
+```
+
+Formato:
+
+```text
+UUID versión 4
+7f0c55ca-3ac5-49a0-8b86-98dd96cef072
+```
+
+PostgreSQL utiliza:
+
+```sql
+token_unico uuid not null unique
+```
+
+y el esquema añade una restricción que acepta únicamente UUID de versión 4 y variante RFC.
+
+El backend genera el valor con `crypto.randomUUID()`.
+
+---
+
 ## Cadena Original
 
 Formato actual:
