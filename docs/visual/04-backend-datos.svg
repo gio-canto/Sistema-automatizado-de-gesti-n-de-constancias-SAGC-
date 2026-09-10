@@ -23,8 +23,8 @@
 </g>
 <rect x="1080" y="520" width="330" height="130" rx="18" fill="#fff0f3" stroke="#e8c0ca"/>
 <text x="1245" y="555" text-anchor="middle" font-size="18" font-weight="700" fill="#8a1538">Punto crítico</text>
-<text x="1245" y="584" text-anchor="middle" font-size="15" fill="#53606f">Folio y cadena ya tienen metodología</text>
-<text x="1245" y="608" text-anchor="middle" font-size="15" fill="#53606f">Token único queda</text>
-<text x="1245" y="632" text-anchor="middle" font-size="15" fill="#53606f">como siguiente definición.</text>
+<text x="1245" y="584" text-anchor="middle" font-size="15" fill="#53606f">Folio, cadena y token definidos</text>
+<text x="1245" y="608" text-anchor="middle" font-size="15" fill="#53606f">Token: UUIDv4 RFC 9562</text>
+<text x="1245" y="632" text-anchor="middle" font-size="15" fill="#53606f">PostgreSQL uuid · UNIQUE</text>
 </g>
 </svg>
