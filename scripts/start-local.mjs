@@ -17,9 +17,18 @@ function spawnProcess(name, command, args, cwd) {
     env: process.env,
   });
 
-  child.on('exit', (code) => {
+  child.on('error', (error) => {
+    console.error(`\n[SAGC:${name}] Error original al iniciar el proceso:`);
+    console.error(error);
+  });
+
+  child.on('exit', (code, signal) => {
     if (code && code !== 0) {
-      console.error(`[${name}] terminó con código ${code}.`);
+      console.error(
+        `\n[SAGC:${name}] El proceso terminó con código ${code}. Revisa arriba la salida original de npm/Node/Vite.`
+      );
+    } else if (signal) {
+      console.error(`\n[SAGC:${name}] El proceso terminó por señal ${signal}.`);
     }
   });
 
@@ -61,7 +70,7 @@ async function waitForUrl(url, timeoutMs = 30000) {
 
       if (response.ok) return true;
     } catch {
-      // El servidor todavía está arrancando.
+      // El proceso de Vite conserva su salida original en esta misma consola.
     }
 
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -79,14 +88,7 @@ async function checkBackend() {
   }
 }
 
-const frontendModules = path.join(root, 'node_modules');
-const backendModules = path.join(serverDir, 'node_modules');
 const envFile = path.join(serverDir, '.env');
-
-if (!existsSync(frontendModules) || !existsSync(backendModules)) {
-  console.error('Faltan dependencias. Ejecuta primero: npm run setup:project');
-  process.exit(1);
-}
 
 console.log('');
 console.log('=======================================');
@@ -95,12 +97,18 @@ console.log('=======================================');
 console.log(`Frontend esperado: ${frontendUrl}`);
 console.log(`Backend esperado:  ${backendUrl}`);
 console.log('');
+console.log('La salida de npm, Node, Express y Vite se mostrará directamente.');
+console.log('El lanzador no instalará ni reparará dependencias automáticamente.');
+console.log('');
 
 if (!existsSync(envFile)) {
-  console.warn('[AVISO] server/.env no existe.');
-  console.warn('        demo/demo podrá funcionar, pero Supabase no estará disponible.');
+  console.warn('[SAGC] ENOENT: no existe server/.env');
+  console.warn(`       Ruta esperada: ${envFile}`);
+  console.warn('       El backend puede fallar al iniciar; su error original aparecerá debajo.');
 }
 
+// No se comprueba node_modules antes de arrancar deliberadamente.
+// Si falta una dependencia, npm/Node/Vite deben imprimir su error original.
 const backend = spawnProcess('backend', 'npm', ['run', 'dev'], serverDir);
 const frontend = spawnProcess(
   'frontend',
@@ -126,19 +134,25 @@ const frontendReady = await waitForUrl(frontendUrl);
 
 if (!frontendReady) {
   console.error('');
-  console.error('ERROR: Vite no respondió en http://127.0.0.1:5173 después de 30 segundos.');
-  console.error('Revisa los mensajes anteriores de la terminal.');
+  console.error('[SAGC] Vite no respondió en 30 segundos.');
+  console.error('[SAGC] El error original del proceso debe aparecer arriba en esta misma consola.');
   shutdown();
 } else {
   const backendReady = await checkBackend();
   console.log('');
-  console.log('[OK] Frontend listo.');
-  console.log(backendReady ? '[OK] Backend listo.' : '[AVISO] Backend no disponible todavía; demo/demo sigue utilizable.');
+  console.log('[SAGC] Frontend listo.');
+  console.log(
+    backendReady
+      ? '[SAGC] Backend listo.'
+      : '[SAGC] Backend no respondió. Revisa arriba su salida original de consola.'
+  );
   console.log(`Abriendo ${frontendUrl} ...`);
 
   try {
     openBrowser(frontendUrl);
-  } catch {
+  } catch (error) {
+    console.error('[SAGC] Error al abrir el navegador:');
+    console.error(error);
     console.log(`Abre manualmente: ${frontendUrl}`);
   }
 }
