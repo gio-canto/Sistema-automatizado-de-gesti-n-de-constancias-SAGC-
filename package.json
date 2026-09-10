@@ -3,20 +3,13 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "packageManager": "npm@10.8.2",
-  "engines": {
-    "node": ">=20",
-    "npm": ">=10"
-  },
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host localhost",
     "build": "vite build",
-    "preview": "vite preview",
-    "server:install": "npm --prefix server install",
+    "preview": "vite preview --host localhost",
     "server:dev": "npm --prefix server run dev",
     "db:check": "npm --prefix server run db:check",
     "db:bootstrap-admin": "npm --prefix server run db:bootstrap-admin",
-    "setup:project": "node scripts/bootstrap-dev.mjs",
     "folio:test": "npm --prefix server run folio:test",
     "chain:test": "npm --prefix server run chain:test",
     "token:test": "npm --prefix server run token:test"
