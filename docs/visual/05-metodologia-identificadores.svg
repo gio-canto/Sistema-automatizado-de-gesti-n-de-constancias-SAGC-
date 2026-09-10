@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="840" viewBox="0 0 1600 840">
 <defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#8a1538"/></marker></defs>
 <rect width="1600" height="840" fill="#ffffff"/>
-<text x="800" y="58" text-anchor="middle" font-family="Arial,sans-serif" font-size="34" font-weight="700" fill="#202124">Identificadores SAGC: folio y cadena definidos</text>
-<text x="800" y="94" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#697386">Folio Único V1 y Cadena Original SAGC definidos · token único pendiente</text>
+<text x="800" y="58" text-anchor="middle" font-family="Arial,sans-serif" font-size="34" font-weight="700" fill="#202124">Identificadores SAGC: folio, cadena y token definidos</text>
+<text x="800" y="94" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#697386">Folio Único V1 · Cadena Original · Token UUIDv4 definidos</text>
 <g font-family="Arial,sans-serif">
 <g fill="#f7f8fa" stroke="#d7dce2" stroke-width="2">
 <rect x="65" y="155" width="300" height="150" rx="18"/><rect x="455" y="155" width="300" height="150" rx="18"/><rect x="845" y="155" width="300" height="150" rx="18"/><rect x="1235" y="155" width="300" height="150" rx="18"/>
@@ -20,7 +20,7 @@
 <g font-size="15" fill="#53606f" text-anchor="middle">
 <text x="215" y="255">Año · serie A-Z · 0001-9999</text><text x="215" y="278">Transacción y bloqueo de fila</text>
 <text x="605" y="255">UTF-8, formatos de fecha,</text><text x="605" y="278">separadores y reglas estables</text>
-<text x="995" y="255">CSPRNG · único · no derivado</text><text x="995" y="278">solo del nombre o folio</text>
+<text x="995" y="255">UUIDv4 · RFC 9562 · único</text><text x="995" y="278">crypto.randomUUID() · backend</text>
 <text x="1385" y="255">folio + titular + fecha</text><text x="1385" y="278">tipo + nombre evento + token</text>
 <text x="410" y="510">folio · token · cadena · estado</text><text x="410" y="533">sin capa criptográfica adicional</text>
 <text x="800" y="510">índices UNIQUE · estado · logs</text><text x="800" y="533">cancelación y reexpedición</text>
@@ -31,7 +31,7 @@
 </g>
 <rect x="170" y="645" width="1260" height="125" rx="22" fill="#202124"/>
 <text x="800" y="684" text-anchor="middle" font-size="20" font-weight="700" fill="white">Estado de las metodologías de identificadores</text>
-<text x="800" y="716" text-anchor="middle" font-size="16" fill="#d9dde3">Folio V1: definido · Cadena Original: definida · Token: pendiente · Validación por registro SAGC</text>
+<text x="800" y="716" text-anchor="middle" font-size="16" fill="#d9dde3">Folio V1: definido · Cadena: definida · Token UUIDv4: definido · Validación por registro SAGC</text>
 <text x="800" y="744" text-anchor="middle" font-size="16" fill="#d9dde3">Implementaciones y vectores de prueba: server/src/services/identifiers/</text>
 </g>
 </svg>
