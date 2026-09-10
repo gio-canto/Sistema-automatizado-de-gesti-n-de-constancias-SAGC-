@@ -1,3 +1,5 @@
+import { normalizarTokenUnico } from './token.js';
+
 export const CADENA_ORIGINAL_MAX_BYTES = 1024;
 
 function required(value, fieldName) {
@@ -100,7 +102,7 @@ export function normalizarEventoEmision(value) {
 }
 
 export function normalizarToken(value) {
-  return required(value, 'token_unico');
+  return normalizarTokenUnico(value);
 }
 
 export function escaparCampoCadena(value) {
