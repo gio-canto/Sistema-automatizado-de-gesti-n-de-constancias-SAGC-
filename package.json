@@ -12,13 +12,20 @@
     "db:bootstrap-admin": "npm --prefix server run db:bootstrap-admin",
     "folio:test": "npm --prefix server run folio:test",
     "chain:test": "npm --prefix server run chain:test",
-    "token:test": "npm --prefix server run token:test"
+    "token:test": "npm --prefix server run token:test",
+    "doctor": "npx react-doctor@latest",
+    "doctor:changed": "npx react-doctor@latest --verbose --scope changed",
+    "doctor:install": "npx react-doctor@latest install",
+    "ui:rare:fluid-orb": "npx shadcn@latest add swamimalode07/rare-ui/fluid-orb"
   },
   "dependencies": {
+    "@blobatar/react": "latest",
     "@vitejs/plugin-react": "latest",
-    "vite": "latest",
+    "blobatar": "latest",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "sileo": "latest",
+    "vite": "latest"
   },
   "devDependencies": {}
 }
