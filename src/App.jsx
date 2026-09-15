@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import SileoHost from './components/system/SileoHost.jsx';
 import AccessGrantedPage from './pages/AccessGrantedPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 
@@ -9,11 +10,14 @@ export default function App() {
     setAuthenticatedUser(null);
   }
 
-  if (authenticatedUser) {
-    return <AccessGrantedPage onLogout={logout} />;
-  }
-
-  return <LoginPage onAuthenticated={setAuthenticatedUser} />;
+  return (
+    <>
+      <SileoHost />
+      {authenticatedUser ? (
+        <AccessGrantedPage onLogout={logout} />
+      ) : (
+        <LoginPage onAuthenticated={setAuthenticatedUser} />
+      )}
+    </>
+  );
 }
-// hola :3
-// si 
