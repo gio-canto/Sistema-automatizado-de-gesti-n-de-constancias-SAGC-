@@ -7,6 +7,7 @@ import './styles/ui-system.css';
 import './styles/workspace.css';
 import './styles/admin-console.css';
 import './styles/admin-suite.css';
+import './styles/console-layout.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
