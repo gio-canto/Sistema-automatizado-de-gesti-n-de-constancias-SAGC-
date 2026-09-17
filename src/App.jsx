@@ -2,12 +2,14 @@ import { useState } from 'react';
 import SileoHost from './components/system/SileoHost.jsx';
 import AccessGrantedPage from './pages/AccessGrantedPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
+import { logoutSession } from './services/auth.js';
 
 export default function App() {
   const [authenticatedUser, setAuthenticatedUser] = useState(null);
 
   function logout() {
     setAuthenticatedUser(null);
+    void logoutSession();
   }
 
   return (
