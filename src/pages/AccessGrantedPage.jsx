@@ -9,27 +9,18 @@ const DOCUMENT_TYPES = [
   { id: 'diploma', title: 'Diploma', icon: 'diploma' },
   { id: 'reconocimiento', title: 'Reconocimiento', icon: 'recognition' },
   { id: 'acreditacion', title: 'Acreditación', icon: 'accreditation' },
-  {
-    id: 'personalizado',
-    title: 'Otros / Personalizado',
-    icon: 'other',
-    wide: true,
-  },
+  { id: 'personalizado', title: 'Otros / Personalizado', icon: 'other', wide: true },
 ];
 
 function BackButton({ onClick }) {
-  return (
-    <button className="workspace-back" type="button" onClick={onClick}>
-      <span aria-hidden="true">←</span>
-      Volver
-    </button>
-  );
+  return <button className="workspace-back" type="button" onClick={onClick}><span aria-hidden="true">←</span>Volver</button>;
 }
 
 export default function AccessGrantedPage({ user, onLogout }) {
   const role = String(user?.permiso || 'NORMAL').toUpperCase();
   const isAdmin = role === 'ADMIN' || role === 'DEMO';
   const [view, setView] = useState(isAdmin ? 'home' : 'sagc');
+  const [consoleSection, setConsoleSection] = useState('dashboard');
 
   const title = useMemo(() => {
     if (view === 'admin') return 'Administración';
@@ -38,10 +29,12 @@ export default function AccessGrantedPage({ user, onLogout }) {
   }, [view]);
 
   function pendingModule(label) {
-    notify.info(
-      `${label} · siguiente etapa`,
-      'La navegación ya está preparada. Implementaremos este módulo en la siguiente pantalla.'
-    );
+    notify.info(`${label} · siguiente etapa`, 'La navegación ya está preparada. Implementaremos este módulo en la siguiente pantalla.');
+  }
+
+  function openConsole(section = 'dashboard') {
+    setConsoleSection(section);
+    setView('console');
   }
 
   function handleConsoleShortcut(id) {
@@ -49,115 +42,58 @@ export default function AccessGrantedPage({ user, onLogout }) {
       setView('sagc');
       return;
     }
+    openConsole(id === 'create-user' ? 'users' : id);
+  }
 
-    const labels = {
-      users: 'Usuarios',
-      'create-user': 'Crear usuario',
-      events: 'Eventos',
-      templates: 'Plantillas',
-      audit: 'Auditoría',
-    };
-
-    pendingModule(labels[id] || id);
+  if (view === 'console' && isAdmin) {
+    return (
+      <main className="workspace-shell workspace-shell--console">
+        <AdminConsolePage
+          user={user}
+          initialSection={consoleSection}
+          onBack={() => setView('admin')}
+          onShortcut={handleConsoleShortcut}
+          onSessionExpired={onLogout}
+        />
+      </main>
+    );
   }
 
   return (
     <main className="workspace-shell">
       <InstitutionalHeader user={user} onLogout={onLogout} />
+      <section className="workspace-content">
+        <div className="workspace-content__topline">
+          {isAdmin && view !== 'home' ? <BackButton onClick={() => setView('home')} /> : <span />}
+          <span className="workspace-role-note">{isAdmin ? 'Acceso administrativo' : 'Acceso operativo'}</span>
+        </div>
 
-      {view === 'console' && isAdmin ? (
-        <AdminConsolePage
-          user={user}
-          onBack={() => setView('admin')}
-          onShortcut={handleConsoleShortcut}
-          onSessionExpired={onLogout}
-        />
-      ) : (
-        <section className="workspace-content">
-          <div className="workspace-content__topline">
-            {isAdmin && view !== 'home' ? (
-              <BackButton onClick={() => setView('home')} />
-            ) : (
-              <span />
-            )}
-            <span className="workspace-role-note">
-              {isAdmin ? 'Acceso administrativo' : 'Acceso operativo'}
-            </span>
+        <header className="workspace-heading">
+          <p className="workspace-heading__eyebrow">{view === 'admin' ? 'ADMIN' : view === 'sagc' ? 'SAGC' : 'INICIO'}</p>
+          <h1>{title}</h1>
+          <p>{view === 'home' ? 'Elige entre las herramientas administrativas y el registro de documentos.' : view === 'admin' ? 'Herramientas reservadas para usuarios con permisos de administrador.' : 'Selecciona el tipo de documento que deseas registrar.'}</p>
+        </header>
+
+        {view === 'home' ? (
+          <div className="workspace-grid workspace-grid--gateway">
+            <WorkspaceCard title="Admin" description="Usuarios, permisos y herramientas administrativas." actionLabel="Abrir" icon="admin" tone="dark" onClick={() => setView('admin')} />
+            <WorkspaceCard title="SAGC" description="Registro y emisión de constancias y documentos." actionLabel="Registrar" icon="document" tone="blue" onClick={() => setView('sagc')} />
           </div>
+        ) : null}
 
-          <header className="workspace-heading">
-            <p className="workspace-heading__eyebrow">
-              {view === 'admin' ? 'ADMIN' : view === 'sagc' ? 'SAGC' : 'INICIO'}
-            </p>
-            <h1>{title}</h1>
-            <p>
-              {view === 'home'
-                ? 'Elige entre las herramientas administrativas y el registro de documentos.'
-                : view === 'admin'
-                  ? 'Herramientas reservadas para usuarios con permisos de administrador.'
-                  : 'Selecciona el tipo de documento que deseas registrar.'}
-            </p>
-          </header>
+        {view === 'admin' ? (
+          <div className="workspace-grid workspace-grid--admin">
+            <WorkspaceCard title="Consola" description="Centro de control completo, sistema, seguridad y gestión." actionLabel="Ingresar" icon="console" tone="dark" onClick={() => openConsole('dashboard')} />
+            <WorkspaceCard title="Crear usuario" description="Alta de cuentas y asignación inicial de permisos." actionLabel="Crear" icon="user" tone="green" onClick={() => openConsole('users')} />
+          </div>
+        ) : null}
 
-          {view === 'home' ? (
-            <div className="workspace-grid workspace-grid--gateway">
-              <WorkspaceCard
-                title="Admin"
-                description="Usuarios, permisos y herramientas administrativas."
-                actionLabel="Crear"
-                icon="admin"
-                tone="dark"
-                onClick={() => setView('admin')}
-              />
-              <WorkspaceCard
-                title="SAGC"
-                description="Registro y emisión de constancias y documentos."
-                actionLabel="Registrar"
-                icon="document"
-                tone="blue"
-                onClick={() => setView('sagc')}
-              />
-            </div>
-          ) : null}
-
-          {view === 'admin' ? (
-            <div className="workspace-grid workspace-grid--admin">
-              <WorkspaceCard
-                title="Consola"
-                description="Estado del sistema, accesos directos, folios y auditoría."
-                actionLabel="Ingresar"
-                icon="console"
-                tone="dark"
-                onClick={() => setView('console')}
-              />
-              <WorkspaceCard
-                title="Crear usuario"
-                description="Alta de cuentas y asignación inicial de permisos."
-                actionLabel="Crear"
-                icon="user"
-                tone="green"
-                onClick={() => pendingModule('Crear usuario')}
-              />
-            </div>
-          ) : null}
-
-          {view === 'sagc' ? (
-            <div className="workspace-grid workspace-grid--documents">
-              {DOCUMENT_TYPES.map((item) => (
-                <WorkspaceCard
-                  key={item.id}
-                  title={item.title}
-                  actionLabel="Registrar"
-                  icon={item.icon}
-                  wide={item.wide}
-                  tone="blue"
-                  onClick={() => pendingModule(item.title)}
-                />
-              ))}
-            </div>
-          ) : null}
-        </section>
-      )}
+        {view === 'sagc' ? (
+          <div className="workspace-grid workspace-grid--documents">
+            {DOCUMENT_TYPES.map((item) => <WorkspaceCard key={item.id} title={item.title} actionLabel="Registrar" icon={item.icon} wide={item.wide} tone="blue" onClick={() => pendingModule(item.title)} />)}
+          </div>
+        ) : null}
+      </section>
     </main>
   );
 }
