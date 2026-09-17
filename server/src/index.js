@@ -28,10 +28,10 @@ import {
   recordLoginFailure,
 } from './security/login-guard.js';
 import { getAdminConsoleSummary } from './services/admin/console.js';
+import { executeAdminConsoleCommand } from './services/admin/command-console.js';
 import {
   createAdminEvent,
   createAdminUser,
-  executeLimitedAdminCommand,
   getAdminSystemHealth,
   listAdminAudit,
   listAdminDocuments,
@@ -188,11 +188,35 @@ app.get('/api/admin/console/summary', async (_req, res) => {
 app.post('/api/admin/console/command', async (req, res) => {
   try {
     const summary = await getAdminConsoleSummary();
-    const result = await executeLimitedAdminCommand(req.body?.command, { summary });
-    return res.json({ ok: true, result });
+    const result = await executeAdminConsoleCommand(req.body?.command, {
+      summary,
+      session: req.sagcSession,
+      currentToken: req.sagcSessionToken,
+      elevated: Boolean(req.sagcSession.elevatedUntil > Date.now()),
+      sessionSnapshot: getSessionSnapshot(req.sagcSessionToken),
+      loginSecurity: getLoginSecuritySnapshot(),
+    });
+
+    if (result.audit) {
+      const client = requireSupabase();
+      await recordAudit(client, {
+        userId: req.sagcSession.id,
+        action: result.audit.action,
+        entity: result.audit.entity,
+        entityId: result.audit.entityId || null,
+        ip: req.ip,
+        metadata: result.audit.metadata || null,
+      });
+    }
+
+    const { audit: _audit, ...publicResult } = result;
+    return res.json({ ok: true, result: publicResult });
   } catch (error) {
-    if (error?.code === 'COMMAND_NOT_ALLOWED') {
-      return res.status(400).json({ ok: false, error: 'Comando no permitido por la consola SAGC.' });
+    if (error?.code === 'ELEVATION_REQUIRED') {
+      return res.status(428).json({ ok: false, error: error.message, requiresReauth: true });
+    }
+    if (['COMMAND_NOT_ALLOWED', 'COMMAND_EMPTY', 'COMMAND_TOO_LONG', 'COMMAND_SYNTAX', 'COMMAND_ARGUMENT', 'COMMAND_NOT_FOUND'].includes(error?.code)) {
+      return res.status(400).json({ ok: false, error: error.message });
     }
     return adminError(res, error);
   }
@@ -316,6 +340,13 @@ app.patch('/api/admin/users/:id', requireElevatedAdmin, async (req, res) => {
   try {
     if (Number(req.params.id) === Number(req.sagcSession.id) && req.body?.activo === false) {
       return res.status(400).json({ ok: false, error: 'No puede desactivar su propia sesión administrativa.' });
+    }
+    if (
+      Number(req.params.id) === Number(req.sagcSession.id) &&
+      req.body?.permiso &&
+      String(req.body.permiso).toUpperCase() !== 'ADMIN'
+    ) {
+      return res.status(400).json({ ok: false, error: 'No puede retirar su propio permiso ADMIN durante la sesión actual.' });
     }
     const user = await updateAdminUser(req.params.id, req.body);
     const client = requireSupabase();
