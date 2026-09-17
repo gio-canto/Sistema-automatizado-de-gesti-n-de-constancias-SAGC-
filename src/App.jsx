@@ -14,7 +14,7 @@ export default function App() {
     <>
       <SileoHost />
       {authenticatedUser ? (
-        <AccessGrantedPage onLogout={logout} />
+        <AccessGrantedPage user={authenticatedUser} onLogout={logout} />
       ) : (
         <LoginPage onAuthenticated={setAuthenticatedUser} />
       )}
