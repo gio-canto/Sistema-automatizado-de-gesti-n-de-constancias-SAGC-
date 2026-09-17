@@ -23,7 +23,7 @@ Sí ofrece operaciones explícitas y auditables mediante endpoints definidos por
 General
 ├── Inicio
 ├── Actividad
-└── Consola limitada
+└── Terminal administrativa
 
 Gestión
 ├── Usuarios
@@ -65,6 +65,7 @@ El modo elevado se utiliza para:
 - cambiar permisos;
 - activar o desactivar cuentas;
 - restablecer contraseñas;
+- cambiar estados sensibles desde terminal;
 - limpiar bloqueos de login;
 - cerrar otras sesiones.
 
@@ -88,20 +89,52 @@ con:
 
 En la etapa actual las sesiones viven en memoria de Express, por lo que reiniciar el backend invalida las sesiones existentes.
 
-## Consola limitada
+## Terminal administrativa delimitada
 
-La vista `Consola` imita una terminal administrativa, pero solo acepta comandos de una lista cerrada:
+La vista `Consola` es ahora una terminal escrita completa dentro del lenguaje SAGC.
+
+Permite:
+
+- escribir comandos manualmente;
+- ejecutar con Enter;
+- autocompletar con Tab;
+- navegar historial con `↑` y `↓`;
+- limpiar con `Ctrl+L` o `clear`;
+- consultar usuarios, eventos, plantillas, documentos, folios, auditoría, seguridad y sesiones;
+- ejecutar algunas modificaciones controladas cuando el modo elevado está activo.
+
+Ejemplos:
 
 ```text
+help
 status
-health
-users.count
-events.count
-folios.current
-audit.latest
+users.list --active --limit 25
+users.show admin
+events.list --state ACTIVO
+documents.show 2026-A-0001
+audit.latest --limit 50
+security.status
 ```
 
-Cada comando se traduce a una función segura en el backend. No existe evaluación de texto como código.
+Comandos sensibles de ejemplo:
+
+```text
+user.disable 12
+user.role 12 ADMIN
+event.state 5 CERRADO
+security.clear-login-blocks
+security.logout-others
+```
+
+No existe evaluación de texto como código. El backend tokeniza y valida el comando y solo ejecuta operaciones registradas explícitamente.
+
+No se aceptan pipes, redirecciones, operadores de shell ni comandos multilínea.
+
+La especificación completa está en:
+
+```text
+docs/GUIA_TERMINAL_ADMIN_DELIMITADA.md
+```
 
 ## Usuarios
 
@@ -159,7 +192,7 @@ La consola consulta `public.auditoria` y muestra:
 - IP;
 - fecha.
 
-Las acciones administrativas sensibles se registran en esta tabla.
+Las acciones administrativas sensibles se registran en esta tabla, incluidas las modificaciones realizadas desde la terminal.
 
 ## Sistema
 
@@ -220,7 +253,8 @@ src/services/
 
 src/styles/
 ├── admin-suite.css
-└── console-layout.css
+├── console-layout.css
+└── terminal-console.css
 
 server/src/security/
 ├── session-store.js
@@ -228,7 +262,8 @@ server/src/security/
 
 server/src/services/admin/
 ├── console.js
-└── operations.js
+├── operations.js
+└── command-console.js
 ```
 
 ## Endpoints administrativos
@@ -259,7 +294,7 @@ GET    /api/admin/documents
 GET    /api/admin/audit
 ```
 
-Todos los endpoints `/api/admin/*` requieren una sesión válida y permiso `ADMIN`. Las rutas sensibles además exigen modo elevado.
+Todos los endpoints `/api/admin/*` requieren una sesión válida y permiso `ADMIN`. Las rutas sensibles y los comandos sensibles además exigen modo elevado.
 
 ## Desarrollo local
 
