@@ -16,6 +16,10 @@ function currentEntry(key) {
   return entry;
 }
 
+function cleanupExpired() {
+  for (const key of attempts.keys()) currentEntry(key);
+}
+
 export function loginThrottle(req, res, next) {
   const key = keyFor(req, req.body?.user);
   const entry = currentEntry(key);
@@ -51,4 +55,32 @@ export function recordLoginFailure(req) {
 export function clearLoginFailures(req) {
   const key = req.sagcLoginKey || keyFor(req, req.body?.user);
   attempts.delete(key);
+}
+
+export function getLoginSecuritySnapshot() {
+  cleanupExpired();
+  const now = Date.now();
+  const entries = Array.from(attempts.entries()).map(([key, entry]) => ({
+    key,
+    failures: entry.failures,
+    blocked: entry.failures >= MAX_FAILURES,
+    retryAfterSeconds: Math.max(
+      0,
+      Math.ceil((WINDOW_MS - (now - entry.startedAt)) / 1000)
+    ),
+  }));
+
+  return {
+    windowMinutes: WINDOW_MS / 60000,
+    maxFailures: MAX_FAILURES,
+    tracked: entries.length,
+    blocked: entries.filter((entry) => entry.blocked).length,
+    entries,
+  };
+}
+
+export function clearAllLoginFailures() {
+  const count = attempts.size;
+  attempts.clear();
+  return count;
 }
