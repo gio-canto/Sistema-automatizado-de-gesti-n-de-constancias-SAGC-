@@ -3,9 +3,7 @@ import { requireSupabase, checkDatabaseConnection } from '../../config/supabase.
 
 function normalizeRole(value) {
   const role = String(value || 'NORMAL').trim().toUpperCase();
-  if (!['NORMAL', 'ADMIN'].includes(role)) {
-    throw new Error('Permiso inválido. Use NORMAL o ADMIN.');
-  }
+  if (!['NORMAL', 'ADMIN'].includes(role)) throw new Error('Permiso inválido. Use NORMAL o ADMIN.');
   return role;
 }
 
@@ -19,9 +17,7 @@ function normalizeUsername(value) {
 
 function normalizePassword(value) {
   const password = String(value || '');
-  if (password.length < 12) {
-    throw new Error('La contraseña debe tener al menos 12 caracteres.');
-  }
+  if (password.length < 12) throw new Error('La contraseña debe tener al menos 12 caracteres.');
   return password;
 }
 
@@ -124,11 +120,7 @@ export async function createAdminEvent(input, createdBy) {
     id_responsable: input?.id_responsable ? Number(input.id_responsable) : null,
   };
 
-  const { data, error } = await client
-    .from('eventos')
-    .insert(payload)
-    .select('*')
-    .single();
+  const { data, error } = await client.from('eventos').insert(payload).select('*').single();
   if (error) throw error;
   return data;
 }
@@ -146,19 +138,34 @@ export async function updateAdminEvent(id, patch) {
     if (!['BORRADOR', 'ACTIVO', 'CERRADO', 'CANCELADO'].includes(state)) throw new Error('Estado inválido.');
     allowed.estado = state;
   }
-  if (patch?.id_responsable !== undefined) {
-    allowed.id_responsable = patch.id_responsable ? Number(patch.id_responsable) : null;
-  }
+  if (patch?.id_responsable !== undefined) allowed.id_responsable = patch.id_responsable ? Number(patch.id_responsable) : null;
   if (!Object.keys(allowed).length) throw new Error('No hay cambios permitidos.');
 
-  const { data, error } = await client
-    .from('eventos')
-    .update(allowed)
-    .eq('id_evento', eventId)
-    .select('*')
-    .single();
+  const { data, error } = await client.from('eventos').update(allowed).eq('id_evento', eventId).select('*').single();
   if (error) throw error;
   return data;
+}
+
+export async function listAdminTemplates() {
+  const client = requireSupabase();
+  const { data, error } = await client
+    .from('plantillas')
+    .select('id_plantilla,id_tipo_documento,nombre,version,modo,archivo_url,miniatura_url,mime_type,orientacion,tamano,creado_por,activo,fecha_creacion,fecha_actualizacion')
+    .order('fecha_actualizacion', { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function listAdminDocuments(limit = 100) {
+  const client = requireSupabase();
+  const safeLimit = Math.min(250, Math.max(1, Number(limit) || 100));
+  const { data, error } = await client
+    .from('constancias')
+    .select('id_constancia,folio,nombre_persona,estado,fecha_emision,id_evento,id_tipo_documento,id_plantilla,emitido_por,token_unico')
+    .order('fecha_emision', { ascending: false })
+    .limit(safeLimit);
+  if (error) throw error;
+  return data ?? [];
 }
 
 export async function listAdminAudit(limit = 100) {
@@ -192,38 +199,13 @@ export async function getAdminSystemHealth(sessionSnapshot, loginSecurity) {
 export async function executeLimitedAdminCommand(command, context) {
   const normalized = String(command || '').trim().toLowerCase();
   const summary = context.summary;
-
   const commands = {
-    status: () => ({
-      title: 'Estado SAGC',
-      lines: [
-        `API: ${summary.system.api}`,
-        `Entorno: ${summary.system.environment}`,
-        `Base: ${summary.database.database} / ${summary.database.provider}`,
-        `Usuarios activos: ${summary.metrics.usersActive}`,
-        `Eventos activos: ${summary.metrics.eventsActive}`,
-      ],
-    }),
-    health: () => ({
-      title: 'Health check',
-      lines: [
-        `PostgreSQL: conectado`,
-        `Esquema: ${summary.database.schema}`,
-        `Uptime: ${summary.system.uptimeSeconds}s`,
-      ],
-    }),
+    status: () => ({ title: 'Estado SAGC', lines: [`API: ${summary.system.api}`, `Entorno: ${summary.system.environment}`, `Base: ${summary.database.database} / ${summary.database.provider}`, `Usuarios activos: ${summary.metrics.usersActive}`, `Eventos activos: ${summary.metrics.eventsActive}`] }),
+    health: () => ({ title: 'Health check', lines: ['PostgreSQL: conectado', `Esquema: ${summary.database.schema}`, `Uptime: ${summary.system.uptimeSeconds}s`] }),
     'users.count': () => ({ title: 'Usuarios', lines: [`Total: ${summary.metrics.usersTotal}`, `Activos: ${summary.metrics.usersActive}`, `ADMIN: ${summary.metrics.adminsActive}`] }),
     'events.count': () => ({ title: 'Eventos', lines: [`Total: ${summary.metrics.eventsTotal}`, `Activos: ${summary.metrics.eventsActive}`] }),
-    'folios.current': () => ({
-      title: 'Folio actual',
-      lines: summary.folios.current
-        ? [`Año: ${summary.folios.current.anio}`, `Serie: ${summary.folios.current.serie}`, `Último valor: ${summary.folios.current.ultimo_valor}`]
-        : ['No existe contador para el año actual.'],
-    }),
-    'audit.latest': () => ({
-      title: 'Auditoría reciente',
-      lines: (summary.audit || []).slice(0, 5).map((row) => `${row.accion} · ${row.entidad} · ${row.fecha}`),
-    }),
+    'folios.current': () => ({ title: 'Folio actual', lines: summary.folios.current ? [`Año: ${summary.folios.current.anio}`, `Serie: ${summary.folios.current.serie}`, `Último valor: ${summary.folios.current.ultimo_valor}`] : ['No existe contador para el año actual.'] }),
+    'audit.latest': () => ({ title: 'Auditoría reciente', lines: (summary.audit || []).slice(0, 5).map((row) => `${row.accion} · ${row.entidad} · ${row.fecha}`) }),
   };
 
   const handler = commands[normalized];
@@ -232,6 +214,5 @@ export async function executeLimitedAdminCommand(command, context) {
     error.code = 'COMMAND_NOT_ALLOWED';
     throw error;
   }
-
   return { command: normalized, ...handler() };
 }
