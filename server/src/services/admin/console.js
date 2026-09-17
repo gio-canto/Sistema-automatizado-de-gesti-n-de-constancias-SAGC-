@@ -1,15 +1,18 @@
-import { checkDatabaseConnection, supabase } from '../../config/supabase.js';
+import {
+  checkDatabaseConnection,
+  requireSupabase,
+} from '../../config/supabase.js';
 
-async function countRows(table, applyFilters) {
-  let query = supabase.from(table).select('*', { count: 'exact', head: true });
+async function countRows(client, table, applyFilters) {
+  let query = client.from(table).select('*', { count: 'exact', head: true });
   if (applyFilters) query = applyFilters(query);
   const { count, error } = await query;
   if (error) throw error;
   return count ?? 0;
 }
 
-async function latestConstancia() {
-  const { data, error } = await supabase
+async function latestConstancia(client) {
+  const { data, error } = await client
     .from('constancias')
     .select('folio,nombre_persona,estado,fecha_emision')
     .order('fecha_emision', { ascending: false })
@@ -20,9 +23,9 @@ async function latestConstancia() {
   return data;
 }
 
-async function currentCounter() {
+async function currentCounter(client) {
   const year = new Date().getFullYear();
-  const { data, error } = await supabase
+  const { data, error } = await client
     .from('contador_folios')
     .select('anio,serie,ultimo_valor,fecha_actualizacion')
     .eq('anio', year)
@@ -32,8 +35,8 @@ async function currentCounter() {
   return data;
 }
 
-async function recentAudit() {
-  const { data, error } = await supabase
+async function recentAudit(client) {
+  const { data, error } = await client
     .from('auditoria')
     .select('id_auditoria,id_usuario,accion,entidad,id_entidad,fecha')
     .order('fecha', { ascending: false })
@@ -44,6 +47,8 @@ async function recentAudit() {
 }
 
 export async function getAdminConsoleSummary() {
+  const client = requireSupabase();
+
   const [
     database,
     usersTotal,
@@ -59,17 +64,17 @@ export async function getAdminConsoleSummary() {
     audit,
   ] = await Promise.all([
     checkDatabaseConnection(),
-    countRows('usuarios'),
-    countRows('usuarios', (q) => q.eq('activo', true)),
-    countRows('usuarios', (q) => q.eq('activo', true).eq('permiso', 'ADMIN')),
-    countRows('eventos'),
-    countRows('eventos', (q) => q.eq('estado', 'ACTIVO')),
-    countRows('plantillas', (q) => q.eq('activo', true)),
-    countRows('constancias'),
-    countRows('constancias', (q) => q.eq('estado', 'EMITIDA')),
-    latestConstancia(),
-    currentCounter(),
-    recentAudit(),
+    countRows(client, 'usuarios'),
+    countRows(client, 'usuarios', (q) => q.eq('activo', true)),
+    countRows(client, 'usuarios', (q) => q.eq('activo', true).eq('permiso', 'ADMIN')),
+    countRows(client, 'eventos'),
+    countRows(client, 'eventos', (q) => q.eq('estado', 'ACTIVO')),
+    countRows(client, 'plantillas', (q) => q.eq('activo', true)),
+    countRows(client, 'constancias'),
+    countRows(client, 'constancias', (q) => q.eq('estado', 'EMITIDA')),
+    latestConstancia(client),
+    currentCounter(client),
+    recentAudit(client),
   ]);
 
   return {
