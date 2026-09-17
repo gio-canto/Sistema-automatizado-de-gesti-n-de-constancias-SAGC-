@@ -1,30 +1,43 @@
 import { createClient } from '@supabase/supabase-js';
 import 'dotenv/config';
 
-const required = ['SUPABASE_URL', 'SUPABASE_SECRET_KEY'];
+const supabaseUrl = String(process.env.SUPABASE_URL || '').trim();
+const supabaseSecretKey = String(process.env.SUPABASE_SECRET_KEY || '').trim();
 
-for (const key of required) {
-  const value = String(process.env[key] || '').trim();
-
-  if (!value || value.includes('CAMBIAR_') || value.includes('TU_PROJECT_REF')) {
-    throw new Error(`Falta configurar correctamente la variable de entorno ${key}`);
-  }
+function isConfigured(value) {
+  return Boolean(
+    value &&
+      !value.includes('CAMBIAR_') &&
+      !value.includes('TU_PROJECT_REF')
+  );
 }
 
-export const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SECRET_KEY,
-  {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-      detectSessionInUrl: false,
-    },
+export const supabaseConfigured =
+  isConfigured(supabaseUrl) && isConfigured(supabaseSecretKey);
+
+export const supabase = supabaseConfigured
+  ? createClient(supabaseUrl, supabaseSecretKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+    })
+  : null;
+
+export function requireSupabase() {
+  if (!supabase) {
+    throw new Error(
+      'Supabase no está configurado. Define SUPABASE_URL y SUPABASE_SECRET_KEY en server/.env.'
+    );
   }
-);
+
+  return supabase;
+}
 
 export async function checkDatabaseConnection() {
-  const { data, error } = await supabase.rpc('sagc_healthcheck');
+  const client = requireSupabase();
+  const { data, error } = await client.rpc('sagc_healthcheck');
 
   if (error) {
     throw new Error(error.message);
