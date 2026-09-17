@@ -39,9 +39,9 @@ function demoSummary() {
   };
 }
 
-export default function AdminConsolePage({ user, onBack, onShortcut, onSessionExpired }) {
+export default function AdminConsolePage({ user, initialSection = 'dashboard', onBack, onShortcut, onSessionExpired }) {
   const demo = String(user?.permiso || '').toUpperCase() === 'DEMO';
-  const [active, setActive] = useState('dashboard');
+  const [active, setActive] = useState(initialSection);
   const [summary, setSummary] = useState(() => (demo ? demoSummary() : null));
   const [loading, setLoading] = useState(!demo);
   const [elevated, setElevated] = useState(false);
@@ -52,6 +52,8 @@ export default function AdminConsolePage({ user, onBack, onShortcut, onSessionEx
   const [pendingAction, setPendingAction] = useState(null);
   const [appearance, setAppearance] = useState(() => localStorage.getItem('sagc-admin-appearance') || 'light');
   const [density, setDensity] = useState(() => localStorage.getItem('sagc-admin-density') || 'comfortable');
+
+  useEffect(() => { setActive(initialSection); }, [initialSection]);
 
   const loadSummary = useCallback(async (announce = false) => {
     if (demo) {
@@ -167,28 +169,10 @@ export default function AdminConsolePage({ user, onBack, onShortcut, onSessionEx
 
   return (
     <>
-      <AdminShell
-        active={active}
-        onNavigate={navigate}
-        user={user}
-        elevated={elevated}
-        onUnlock={() => requireElevated()}
-        onLock={lockElevation}
-        onBack={onBack}
-        onLogout={onSessionExpired}
-        appearance={appearance}
-        density={density}
-      >
+      <AdminShell active={active} onNavigate={navigate} user={user} elevated={elevated} onUnlock={() => requireElevated()} onLock={lockElevation} onBack={onBack} onLogout={onSessionExpired} appearance={appearance} density={density}>
         {content}
       </AdminShell>
-
-      <SecureActionModal
-        open={secureOpen}
-        busy={secureBusy}
-        error={secureError}
-        onClose={() => { if (!secureBusy) { setSecureOpen(false); setPendingAction(null); } }}
-        onConfirm={confirmElevation}
-      />
+      <SecureActionModal open={secureOpen} busy={secureBusy} error={secureError} onClose={() => { if (!secureBusy) { setSecureOpen(false); setPendingAction(null); } }} onConfirm={confirmElevation} />
     </>
   );
 }
