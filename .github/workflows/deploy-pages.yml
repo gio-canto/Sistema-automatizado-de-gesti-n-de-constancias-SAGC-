@@ -31,6 +31,15 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Validate backend syntax
+        run: npm run server:check
+
+      - name: Validate SAGC identifiers
+        run: |
+          npm run folio:test
+          npm run token:test
+          npm run chain:test
+
       - name: Build
         run: npm run build
 
