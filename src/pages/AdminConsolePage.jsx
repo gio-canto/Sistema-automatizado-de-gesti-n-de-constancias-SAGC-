@@ -156,7 +156,25 @@ export default function AdminConsolePage({ user, initialSection = 'dashboard', o
   let content;
   if (active === 'dashboard') content = <AdminDashboardView summary={summary} loading={loading} user={user} onNavigate={navigate} onRefresh={() => loadSummary(true)} />;
   else if (active === 'activity') content = <AdminActivityView summary={summary} onNavigate={navigate} />;
-  else if (active === 'console') content = <div className="apple-view"><header className="apple-view__hero"><div><span>GENERAL</span><h1>Consola limitada</h1><p>Comandos administrativos permitidos, siempre de solo lectura y sin acceso a SQL o al sistema operativo.</p></div></header><LimitedConsolePanel demo={demo} /></div>;
+  else if (active === 'console') content = (
+    <div className="apple-view">
+      <header className="apple-view__hero">
+        <div>
+          <span>GENERAL</span>
+          <h1>Terminal administrativa</h1>
+          <p>Escribe comandos directamente. La terminal es amplia, pero está delimitada al lenguaje SAGC: no ofrece shell, SQL libre, pipes, redirecciones ni acceso a secretos.</p>
+        </div>
+        <div className={`apple-secure-badge ${elevated ? 'is-unlocked' : ''}`}>
+          {elevated ? 'Modo elevado activo' : 'Modo protegido'}
+        </div>
+      </header>
+      <LimitedConsolePanel
+        demo={demo}
+        elevated={elevated}
+        onRequireElevation={() => requireElevated()}
+      />
+    </div>
+  );
   else if (active === 'users') content = <AdminUsersView demo={demo} elevated={elevated} onRequireElevated={requireElevated} onSessionExpired={onSessionExpired} />;
   else if (active === 'events') content = <AdminEventsView demo={demo} onSessionExpired={onSessionExpired} />;
   else if (active === 'templates') content = <AdminTemplatesView demo={demo} onSessionExpired={onSessionExpired} />;
