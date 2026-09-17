@@ -57,7 +57,7 @@ app.post('/api/auth/login', async (req, res) => {
     const { data: account, error } = await supabase
       .from('usuarios')
       .select(
-        'id_usuario,nombre,usuario,password_hash,permiso,activo'
+        'id_usuario,nombre,usuario,password_hash,permiso,foto,activo'
       )
       .eq('usuario', user)
       .maybeSingle();
@@ -92,6 +92,7 @@ app.post('/api/auth/login', async (req, res) => {
         nombre: account.nombre,
         usuario: account.usuario,
         permiso: account.permiso,
+        foto: account.foto || null,
       },
     });
   } catch (error) {
