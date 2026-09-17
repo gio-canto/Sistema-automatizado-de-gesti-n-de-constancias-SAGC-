@@ -11,6 +11,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "server:dev": "npm --workspace sagc-api run dev",
+    "server:check": "npm --workspace sagc-api run check",
     "db:check": "npm --workspace sagc-api run db:check",
     "db:bootstrap-admin": "npm --workspace sagc-api run db:bootstrap-admin",
     "folio:test": "npm --workspace sagc-api run folio:test",
