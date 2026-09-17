@@ -22,6 +22,7 @@ export async function authenticateUser({ user, password }) {
   try {
     const response = await fetch('/api/auth/login', {
       method: 'POST',
+      credentials: 'same-origin',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -52,5 +53,16 @@ export async function authenticateUser({ user, password }) {
       error:
         'No fue posible contactar el backend. En GitHub Pages use el acceso de prototipo; para usuarios reales ejecute la API conectada a Supabase.',
     };
+  }
+}
+
+export async function logoutSession() {
+  try {
+    await fetch('/api/auth/logout', {
+      method: 'POST',
+      credentials: 'same-origin',
+    });
+  } catch {
+    // El estado local se elimina aunque el backend no esté disponible.
   }
 }
