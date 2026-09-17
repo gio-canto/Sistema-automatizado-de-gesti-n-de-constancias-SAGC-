@@ -31,7 +31,7 @@ export function ActionButton({ children = 'Eliminar', tone = 'danger', loading =
 
 function passwordScore(value) {
   const rules = [
-    value.length >= 8,
+    value.length >= 12,
     /[A-Z]/.test(value),
     /[a-z]/.test(value),
     /\d/.test(value),
@@ -60,7 +60,7 @@ export function PasswordStrengthField({ value, onChange, label = 'Contraseña', 
       </div>
       <div className="sagc-strength-track" aria-hidden="true"><span style={{ width: `${(score / 5) * 100}%` }} /></div>
       <div className="sagc-rule-row">
-        {['8 caracteres', 'A-Z', 'a-z', '123', '@#$'].map((text, index) => (
+        {['12 caracteres', 'A-Z', 'a-z', '123', '@#$'].map((text, index) => (
           <span key={text} className={rules[index] ? 'is-valid' : ''}><i>{rules[index] ? '✓' : '○'}</i>{text}</span>
         ))}
       </div>
