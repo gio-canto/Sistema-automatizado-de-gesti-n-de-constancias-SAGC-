@@ -1,0 +1,12 @@
+.workspace-shell--console {
+  min-height: 100vh;
+  background: transparent;
+}
+
+.workspace-shell--console .apple-admin-shell {
+  min-height: 100vh;
+}
+
+.workspace-shell--console .apple-admin-sidebar {
+  height: 100vh;
+}
