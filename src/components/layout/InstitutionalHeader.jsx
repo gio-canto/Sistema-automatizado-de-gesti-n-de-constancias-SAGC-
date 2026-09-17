@@ -28,7 +28,11 @@ export default function InstitutionalHeader({ user, onLogout }) {
         {user?.foto ? (
           <img className="workspace-header__photo" src={user.foto} alt="" />
         ) : (
-          <UserBlobatar name={user?.usuario || name} size={46} />
+          <UserBlobatar
+            className="workspace-header__avatar"
+            name={user?.usuario || name}
+            size={46}
+          />
         )}
 
         <div className="workspace-header__identity">
