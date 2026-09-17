@@ -1,9 +1,19 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function SecureActionModal({ open, onClose, onConfirm, busy = false, error = '' }) {
   const [password, setPassword] = useState('');
 
+  useEffect(() => {
+    if (!open) setPassword('');
+  }, [open]);
+
   if (!open) return null;
+
+  function close() {
+    if (busy) return;
+    setPassword('');
+    onClose?.();
+  }
 
   async function submit(event) {
     event.preventDefault();
@@ -14,7 +24,7 @@ export default function SecureActionModal({ open, onClose, onConfirm, busy = fal
 
   return (
     <div className="apple-secure-overlay" role="presentation" onMouseDown={(event) => {
-      if (event.target === event.currentTarget && !busy) onClose?.();
+      if (event.target === event.currentTarget) close();
     }}>
       <form className="apple-secure-modal" onSubmit={submit} role="dialog" aria-modal="true" aria-labelledby="secure-title">
         <div className="apple-secure-modal__icon">⌾</div>
@@ -34,10 +44,10 @@ export default function SecureActionModal({ open, onClose, onConfirm, busy = fal
         </label>
         {error ? <div className="apple-secure-modal__error">{error}</div> : null}
         <div className="apple-secure-modal__actions">
-          <button type="button" className="secondary" onClick={onClose} disabled={busy}>Cancelar</button>
+          <button type="button" className="secondary" onClick={close} disabled={busy}>Cancelar</button>
           <button type="submit" className="primary" disabled={!password || busy}>{busy ? 'Verificando…' : 'Desbloquear'}</button>
         </div>
-        <small>El modo elevado expira automáticamente y nunca revela tu contraseña al navegador después de verificarla.</small>
+        <small>El modo elevado expira automáticamente y la contraseña se limpia del formulario al cerrar este diálogo.</small>
       </form>
     </div>
   );
