@@ -375,7 +375,7 @@ create or replace function public.sagc_cap_consume_nonce(
 returns boolean
 language plpgsql
 set search_path = public
-as $
+as $$
 declare
   v_rows integer;
 begin
@@ -393,7 +393,7 @@ begin
   get diagnostics v_rows = row_count;
   return v_rows = 1;
 end;
-$;
+$$;
 
 create or replace function public.sagc_cap_store_token(
   p_token_key text,
@@ -402,7 +402,7 @@ create or replace function public.sagc_cap_store_token(
 returns boolean
 language plpgsql
 set search_path = public
-as $
+as $$
 declare
   v_rows integer;
 begin
@@ -420,7 +420,7 @@ begin
   get diagnostics v_rows = row_count;
   return v_rows = 1;
 end;
-$;
+$$;
 
 create or replace function public.sagc_cap_consume_token(
   p_token_key text
@@ -428,7 +428,7 @@ create or replace function public.sagc_cap_consume_token(
 returns boolean
 language plpgsql
 set search_path = public
-as $
+as $$
 declare
   v_rows integer;
 begin
@@ -442,7 +442,7 @@ begin
   get diagnostics v_rows = row_count;
   return v_rows = 1;
 end;
-$;
+$$;
 
 -- ---------------------------------------------------------------------
 -- 11. HEALTH CHECK PARA LA API
@@ -501,7 +501,10 @@ grant select, insert, update, delete on table
   public.plantillas,
   public.contador_folios,
   public.constancias,
-  public.auditoria,
+  public.auditoria
+to service_role;
+
+grant select, insert, delete on table
   public.cap_nonces,
   public.cap_tokens
 to service_role;
