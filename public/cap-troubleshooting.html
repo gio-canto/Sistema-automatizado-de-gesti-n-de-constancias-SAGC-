@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Ayuda de verificación CAP · SAGC</title>
+  <style>
+    :root { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:#1d1d1f; background:#f5f5f7; }
+    body { margin:0; min-height:100vh; display:grid; place-items:center; padding:24px; }
+    main { width:min(620px,100%); padding:28px; border:1px solid #ffffffaa; border-radius:24px; background:#ffffffd9; box-shadow:0 22px 60px #1f26321c; }
+    h1 { margin:0 0 10px; font-size:28px; }
+    p,li { color:#656970; line-height:1.55; }
+    code { padding:2px 6px; border-radius:6px; background:#eceef2; }
+    a { color:#0a84ff; }
+    @media (prefers-color-scheme:dark) { :root{color:#f5f5f7;background:#121317} main{background:#202329dd;border-color:#ffffff12} p,li{color:#a9adb5} code{background:#30343b} }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Verificación CAP</h1>
+    <p>SAGC utiliza una verificación humana autoalojada. Si el widget no termina:</p>
+    <ul>
+      <li>comprueba que JavaScript y WebAssembly estén habilitados;</li>
+      <li>desactiva temporalmente extensiones que bloqueen los <code>Web Workers</code> de esta página;</li>
+      <li>recarga SAGC e intenta nuevamente;</li>
+      <li>si el problema continúa, comunícalo al administrador del sistema.</li>
+    </ul>
+    <p>La verificación y sus recursos se sirven desde la misma infraestructura de SAGC.</p>
+    <p><a href="./">Volver a SAGC</a></p>
+  </main>
+</body>
+</html>
