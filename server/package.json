@@ -9,19 +9,21 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
-    "check": "node --check src/index.js && node --check src/security/session-store.js && node --check src/security/login-guard.js && node --check src/services/admin/console.js",
+    "check": "node --check src/index.js && node --check src/security/session-store.js && node --check src/security/login-guard.js && node --check src/services/admin/console.js && node --check src/services/admin/command-console.js && node --check src/services/captcha/cap.js",
     "db:check": "node src/scripts/check-db.js",
     "db:bootstrap-admin": "node src/scripts/bootstrap-admin.js",
+    "cap:secret": "node src/scripts/generate-cap-secret.js",
     "chain:test": "node src/scripts/check-cadena-original.js",
     "folio:test": "node src/scripts/check-folio.js",
     "token:test": "node src/scripts/check-token.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.57.4",
     "argon2": "^0.41.1",
+    "capjs-core": "0.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
-    "helmet": "^8.1.0",
-    "@supabase/supabase-js": "^2.57.4"
+    "helmet": "^8.1.0"
   }
 }
