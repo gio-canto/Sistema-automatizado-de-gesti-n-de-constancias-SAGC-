@@ -25,7 +25,7 @@ import { notify } from '../lib/notify.js';
 function demoSummary() {
   return {
     generatedAt: new Date().toISOString(),
-    system: { api: 'demo', environment: 'GitHub Pages', node: 'Sin backend', uptimeSeconds: 0 },
+    system: { api: 'demo', environment: 'Prototipo local', node: 'Sin backend', uptimeSeconds: 0 },
     database: { provider: 'Supabase', database: 'PostgreSQL', schema: 'public', demo: true },
     metrics: { usersTotal: 2, usersActive: 2, adminsActive: 1, eventsTotal: 1, eventsActive: 1, templatesActive: 1, certificatesTotal: 1, certificatesIssued: 1 },
     folios: {
