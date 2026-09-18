@@ -120,7 +120,7 @@ Express + capjs-core
 Supabase/PostgreSQL
 ```
 
-El widget, WASM y fallback pako se empaquetan localmente con Vite. El secreto `CAP_SECRET` vive solo en `server/.env`.
+El widget oficial, el WASM y el fallback pako se guardan en `public/vendor/cap/` y se sirven desde el propio SAGC. Vite no necesita resolver paquetes cliente de Cap. El secreto `CAP_SECRET` vive solo en `server/.env`.
 
 Componente:
 
