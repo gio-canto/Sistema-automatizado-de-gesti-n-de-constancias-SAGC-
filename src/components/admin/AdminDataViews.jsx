@@ -89,7 +89,7 @@ export function AdminSystemView({ demo, onSessionExpired }) {
   const [health, setHealth] = useState(null);
   const [loading, setLoading] = useState(!demo);
   async function load() {
-    if (demo) return setHealth({ api: { status: 'demo', node: 'N/A', environment: 'GitHub Pages', uptimeSeconds: 0, memory: {} }, database: { provider: 'Supabase', database: 'PostgreSQL', schema: 'public' }, sessions: { total: 0, admins: 0, elevated: 0 } });
+    if (demo) return setHealth({ api: { status: 'demo', node: 'N/A', environment: 'Prototipo local', uptimeSeconds: 0, memory: {} }, database: { provider: 'Supabase', database: 'PostgreSQL', schema: 'public' }, sessions: { total: 0, admins: 0, elevated: 0 } });
     setLoading(true);
     try { setHealth(await fetchAdminSystemHealth()); }
     catch (error) { if (error.status === 401 || error.status === 403) return onSessionExpired?.(); notify.error('Sistema', error.message); }
