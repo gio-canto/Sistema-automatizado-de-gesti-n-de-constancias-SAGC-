@@ -6,14 +6,12 @@ import {
   useState,
 } from 'react';
 import wasmUrl from '@cap.js/wasm/browser/cap_wasm_bg.wasm?url';
-import pakoUrl from 'pako/dist/pako_inflate.min.js?url';
-
 let capWidgetLoader;
 
 function loadCapWidget() {
   if (!capWidgetLoader) {
     window.CAP_CUSTOM_WASM_URL = wasmUrl;
-    window.CAP_PAKO_URL = pakoUrl;
+    window.CAP_PAKO_URL = `${import.meta.env.BASE_URL}vendor/cap/pako_inflate.min.js`;
     window.CAP_DISABLE_WIDGET_REF = true;
 
     capWidgetLoader = import('cap-widget');
