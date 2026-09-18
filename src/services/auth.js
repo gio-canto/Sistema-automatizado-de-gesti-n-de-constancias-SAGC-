@@ -1,12 +1,14 @@
 const DEMO_USER = 'demo';
 const DEMO_PASSWORD = 'demo';
 
-export async function authenticateUser({ user, password }) {
+export async function authenticateUser({ user, password, capToken }) {
   const normalizedUser = String(user ?? '').trim();
+  const normalizedCapToken = String(capToken ?? '');
 
   if (
     normalizedUser.toLowerCase() === DEMO_USER &&
-    password === DEMO_PASSWORD
+    password === DEMO_PASSWORD &&
+    normalizedCapToken
   ) {
     return {
       ok: true,
@@ -29,6 +31,7 @@ export async function authenticateUser({ user, password }) {
       body: JSON.stringify({
         user: normalizedUser,
         password,
+        capToken: normalizedCapToken,
       }),
     });
 
@@ -37,6 +40,7 @@ export async function authenticateUser({ user, password }) {
     if (!response.ok || !data?.ok) {
       return {
         ok: false,
+        captchaRequired: Boolean(data?.captchaRequired),
         error: data?.error || 'Usuario o contraseña incorrectos.',
       };
     }
@@ -51,7 +55,7 @@ export async function authenticateUser({ user, password }) {
       ok: false,
       networkError: true,
       error:
-        'No fue posible contactar el backend. En GitHub Pages use el acceso de prototipo; para usuarios reales ejecute la API conectada a Supabase.',
+        'No fue posible contactar el backend de SAGC. La verificación CAP y los usuarios reales requieren la API local o desplegada.',
     };
   }
 }
