@@ -109,8 +109,24 @@ app.get('/api/health/db', async (_req, res) => {
   }
 });
 
-app.get('/api/cap/status', (_req, res) => {
-  res.json({ ok: true, cap: getCapStatus() });
+app.get('/api/cap/status', async (_req, res) => {
+  try {
+    const cap = await getCapStatus();
+    res.status(cap.ready ? 200 : 503).json({ ok: cap.ready, cap });
+  } catch (error) {
+    console.error('No fue posible comprobar el estado de CAP:', error);
+    res.status(503).json({
+      ok: false,
+      cap: {
+        configured: false,
+        storageReady: false,
+        ready: false,
+        mode: 'core',
+        scope: 'sagc-login',
+        reason: 'CAP_STATUS_ERROR',
+      },
+    });
+  }
 });
 
 app.post('/api/cap/login/challenge', async (_req, res) => {
