@@ -101,7 +101,50 @@ En esos casos se usa modal, diálogo o mensaje junto al campo.
 
 ---
 
-# 3. React Doctor — revisión de calidad React
+# 3. Cap — verificación humana autoalojada
+
+**Estado:** integrado en el login real.
+
+SAGC utiliza **Cap Core** dentro de Express y el widget oficial dentro de React.
+
+No se usa una instancia externa de CAPTCHA. El flujo es:
+
+```text
+cap-widget
+   ↓
+/api/cap/login/challenge
+/api/cap/login/redeem
+   ↓
+Express + capjs-core
+   ↓
+Supabase/PostgreSQL
+```
+
+El widget, WASM y fallback pako se empaquetan localmente con Vite. El secreto `CAP_SECRET` vive solo en `server/.env`.
+
+Componente:
+
+```text
+src/components/CapCaptcha.jsx
+```
+
+Backend:
+
+```text
+server/src/services/captcha/cap.js
+```
+
+Guía completa:
+
+```text
+docs/GUIA_CAP_SELF_HOSTED.md
+```
+
+Cap sustituye por completo al antiguo `LocalCaptcha` simulado. El token se verifica y consume en backend antes de autenticar al usuario.
+
+---
+
+# 4. React Doctor — revisión de calidad React
 
 **Estado:** preparado como comando; no se ejecuta automáticamente.
 
@@ -141,7 +184,7 @@ No se ejecuta durante `npm run dev`, para que nunca oculte ni modifique el error
 
 ---
 
-# 4. Blobatar — avatares deterministas
+# 5. Blobatar — avatares deterministas
 
 **Estado:** dependencia añadida.
 
@@ -185,7 +228,7 @@ El mismo texto genera siempre el mismo avatar.
 
 ---
 
-# 5. Rare UI — Fluid Orb
+# 6. Rare UI — Fluid Orb
 
 **Estado:** preparado para instalación posterior.
 
@@ -219,7 +262,7 @@ src/components/ui/fluid-orb.*
 
 ---
 
-# 6. Sistema visual SAGC basado en las referencias
+# 7. Sistema visual SAGC basado en las referencias
 
 Los ejemplos visuales compartidos se convierten en componentes reutilizables propios de SAGC. No son imágenes pegadas dentro de la interfaz: se implementan como componentes React adaptables.
 
@@ -250,7 +293,7 @@ para accesibilidad.
 
 ---
 
-## 6.1 ActionButton
+## 7.1 ActionButton
 
 Inspirado en los botones premium de acción/eliminación.
 
@@ -276,14 +319,14 @@ dark
 
 ---
 
-## 6.2 PasswordStrengthField
+## 7.2 PasswordStrengthField
 
 Inspirado en el campo de contraseña con medidor de fuerza.
 
 Incluye:
 
 - mostrar/ocultar contraseña;
-- mínimo de 8 caracteres;
+- mínimo de 12 caracteres;
 - mayúsculas;
 - minúsculas;
 - números;
@@ -300,7 +343,7 @@ No sustituye las reglas del backend. El backend debe volver a validar la contras
 
 ---
 
-## 6.3 LightSidebar
+## 7.3 LightSidebar
 
 Inspirado en las referencias de sidebar clara tipo panel administrativo/Storeify-Shopify.
 
@@ -335,7 +378,7 @@ En móvil se compacta automáticamente.
 
 ---
 
-## 6.4 FileDropzone
+## 7.4 FileDropzone
 
 Inspirado en el uploader premium de archivos.
 
@@ -358,7 +401,7 @@ El componente solo maneja selección visual. La validación real de MIME, peso y
 
 ---
 
-## 6.5 PillNav
+## 7.5 PillNav
 
 Navegación compacta tipo píldora inspirada en las referencias de navegación flotante.
 
@@ -374,7 +417,7 @@ No reemplaza la sidebar para módulos grandes.
 
 ---
 
-## 6.6 DateField
+## 7.6 DateField
 
 Campo de fecha visual con estilo premium.
 
@@ -395,7 +438,7 @@ Uso previsto:
 
 ---
 
-## 6.7 ComposerField
+## 7.7 ComposerField
 
 Textarea inspirado en el ejemplo con barra inferior.
 
@@ -417,7 +460,7 @@ Los botones solo exponen callbacks; cada módulo decide qué acción ejecutar.
 
 ---
 
-## 6.8 SuccessCard
+## 7.8 SuccessCard
 
 Tarjeta de éxito para finales de procesos importantes.
 
@@ -433,7 +476,7 @@ Para acciones pequeñas debe preferirse Sileo, no una tarjeta completa.
 
 ---
 
-## 6.9 ProgressIconButton
+## 7.9 ProgressIconButton
 
 Botón circular con progreso visual.
 
@@ -452,7 +495,7 @@ Cuando llega a `100`, muestra confirmación visual.
 
 ---
 
-## 6.10 StickyHeader
+## 7.10 StickyHeader
 
 Header flotante/sticky inspirado en la referencia premium.
 
@@ -465,7 +508,7 @@ Uso previsto:
 
 ---
 
-# 7. Archivos del sistema UI
+# 8. Archivos del sistema UI
 
 ```text
 src/
@@ -486,7 +529,7 @@ src/
 
 ---
 
-# 8. Regla para elegir cada componente
+# 9. Regla para elegir cada componente
 
 | Necesidad | Componente/herramienta |
 |---|---|
@@ -507,7 +550,7 @@ src/
 
 ---
 
-# 9. Instalación después de actualizar el repositorio
+# 10. Instalación después de actualizar el repositorio
 
 Cuando `package.json` cambie por nuevas herramientas, ejecutar manualmente:
 
@@ -525,7 +568,7 @@ npm run dev
 
 ---
 
-# 10. Criterio de integración futura
+# 11. Criterio de integración futura
 
 Los componentes de esta guía son una **biblioteca preparada**, no significa que deban mostrarse todos desde ahora.
 
