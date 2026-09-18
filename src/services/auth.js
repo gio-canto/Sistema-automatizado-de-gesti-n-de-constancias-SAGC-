@@ -51,7 +51,7 @@ export async function authenticateUser({ user, password }) {
       ok: false,
       networkError: true,
       error:
-        'No fue posible contactar el backend. En GitHub Pages use el acceso de prototipo; para usuarios reales ejecute la API conectada a Supabase.',
+        'No fue posible contactar el servidor de SAGC. Verifique que la aplicación Node.js esté en ejecución y que la API esté disponible en /api.',
     };
   }
 }
