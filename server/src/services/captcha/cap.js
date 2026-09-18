@@ -114,11 +114,47 @@ export async function consumeLoginCapToken(tokenValue) {
   return data === true;
 }
 
-export function getCapStatus() {
-  return {
-    configured: Buffer.byteLength(String(process.env.CAP_SECRET || ''), 'utf8') >= 16,
+export async function getCapStatus() {
+  const configured =
+    Buffer.byteLength(String(process.env.CAP_SECRET || ''), 'utf8') >= 16;
+
+  const status = {
+    configured,
+    storageReady: false,
+    ready: false,
     mode: 'core',
     scope: LOGIN_SCOPE,
     tokenTtlSeconds: LOGIN_TOKEN_TTL_MS / 1000,
+    reason: null,
   };
+
+  if (!configured) {
+    status.reason = 'CAP_SECRET_MISSING';
+    return status;
+  }
+
+  try {
+    const client = requireSupabase();
+
+    const [noncesCheck, tokensCheck] = await Promise.all([
+      client
+        .from('cap_nonces')
+        .select('signature', { count: 'exact', head: true }),
+      client
+        .from('cap_tokens')
+        .select('token_key', { count: 'exact', head: true }),
+    ]);
+
+    if (noncesCheck.error || tokensCheck.error) {
+      status.reason = 'CAP_STORAGE_MISSING';
+      return status;
+    }
+
+    status.storageReady = true;
+    status.ready = true;
+    return status;
+  } catch {
+    status.reason = 'CAP_DATABASE_UNAVAILABLE';
+    return status;
+  }
 }
