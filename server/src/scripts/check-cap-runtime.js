@@ -10,6 +10,8 @@ if (!status.ready) {
   const messages = {
     CAP_SECRET_MISSING:
       'Falta CAP_SECRET en server/.env. Genérelo con: npm run cap:secret',
+    CAP_SUPABASE_NOT_CONFIGURED:
+      'Supabase no está configurado para la API. Revise SUPABASE_URL y SUPABASE_SECRET_KEY en server/.env.',
     CAP_STORAGE_MISSING:
       'Falta la migración de Cap en Supabase. Ejecute database/migrations/002_cap_captcha.sql.',
     CAP_DATABASE_UNAVAILABLE:
@@ -20,6 +22,9 @@ if (!status.ready) {
 
   console.error('CAP no está listo.');
   console.error(messages[status.reason] || status.reason || 'Estado desconocido.');
+  if (status.detail) {
+    console.error('Detalle:', status.detail);
+  }
   process.exit(1);
 }
 
