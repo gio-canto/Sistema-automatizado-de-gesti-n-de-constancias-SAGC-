@@ -5,16 +5,80 @@ import {
   useRef,
   useState,
 } from 'react';
-import wasmUrl from '@cap.js/wasm/browser/cap_wasm_bg.wasm?url';
+
 let capWidgetLoader;
 
-function loadCapWidget() {
-  if (!capWidgetLoader) {
-    window.CAP_CUSTOM_WASM_URL = wasmUrl;
-    window.CAP_PAKO_URL = `${import.meta.env.BASE_URL}vendor/cap/pako_inflate.min.js`;
-    window.CAP_DISABLE_WIDGET_REF = true;
+function localCapAsset(fileName) {
+  return `${import.meta.env.BASE_URL}vendor/cap/${fileName}`;
+}
 
-    capWidgetLoader = import('cap-widget');
+function loadCapWidget() {
+  window.CAP_CUSTOM_WASM_URL = localCapAsset('cap_wasm_bg.wasm');
+  window.CAP_PAKO_URL = localCapAsset('pako_inflate.min.js');
+  window.CAP_DISABLE_WIDGET_REF = true;
+
+  if (customElements.get('cap-widget')) {
+    return Promise.resolve();
+  }
+
+  if (!capWidgetLoader) {
+    capWidgetLoader = new Promise((resolve, reject) => {
+      const selector = 'script[data-sagc-cap-widget="true"]';
+      const existing = document.querySelector(selector);
+
+      const finish = () => {
+        if (customElements.get('cap-widget')) {
+          resolve();
+          return;
+        }
+
+        reject(
+          new Error(
+            'El recurso local de Cap cargó, pero no registró el elemento cap-widget.'
+          )
+        );
+      };
+
+      if (existing) {
+        if (existing.dataset.loaded === 'true') {
+          finish();
+          return;
+        }
+
+        existing.addEventListener('load', finish, { once: true });
+        existing.addEventListener(
+          'error',
+          () => reject(new Error('No fue posible cargar el widget local de Cap.')),
+          { once: true }
+        );
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = localCapAsset('cap.min.js');
+      script.async = true;
+      script.dataset.sagcCapWidget = 'true';
+
+      script.addEventListener(
+        'load',
+        () => {
+          script.dataset.loaded = 'true';
+          finish();
+        },
+        { once: true }
+      );
+
+      script.addEventListener(
+        'error',
+        () => reject(new Error('No fue posible cargar el widget local de Cap.')),
+        { once: true }
+      );
+
+      document.head.appendChild(script);
+    }).catch((error) => {
+      capWidgetLoader = undefined;
+      throw error;
+    });
   }
 
   return capWidgetLoader;
@@ -47,11 +111,15 @@ const CapCaptcha = forwardRef(function CapCaptcha(
 
     loadCapWidget()
       .then(() => {
-        if (active) setReady(true);
+        if (active) {
+          setReady(true);
+          setError('');
+        }
       })
       .catch(() => {
         if (active) {
-          setError('No fue posible cargar la verificación CAP.');
+          setReady(false);
+          setError('No fue posible cargar la verificación CAP local.');
         }
       });
 
@@ -61,6 +129,8 @@ const CapCaptcha = forwardRef(function CapCaptcha(
   }, []);
 
   useEffect(() => {
+    if (!ready) return undefined;
+
     const widget = widgetRef.current;
     if (!widget) return undefined;
 
