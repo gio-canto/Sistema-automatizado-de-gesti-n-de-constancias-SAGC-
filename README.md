@@ -934,7 +934,7 @@ respaldos con datos personales
 - [x] React + Vite
 - [x] Login
 - [x] Identidad visual
-- [x] Frontend Vite sin dependencia de GitHub Pages
+- [x] Frontend Vite servido por Express en producción
 - [x] README de alcance
 - [x] Diagramas visuales del proyecto
 
@@ -1129,7 +1129,7 @@ PostgreSQL
 La base de datos se consume desde el proyecto Supabase configurado para SAGC; no se requiere un servidor PostgreSQL local para el flujo normal de desarrollo.
 
 > [!IMPORTANT]
-> La clave secreta de Supabase es exclusiva del backend. Nunca debe colocarse en React, variables `VITE_*`, GitHub Pages ni archivos versionados.
+> La clave secreta de Supabase es exclusiva del backend. Nunca debe colocarse en React, variables `VITE_*` ni archivos versionados.
 
 ---
 
@@ -1382,9 +1382,19 @@ El frontend y la API Express deben desplegarse en una infraestructura que ejecut
 
 SAGC ya no utiliza GitHub Pages.
 
-El despliegue objetivo debe ejecutar el frontend y el backend Express dentro de la misma infraestructura o detrás del mismo dominio, manteniendo las rutas `/api/*` disponibles para autenticación, CAPTCHA y demás funciones server-side.
+El despliegue de producción ejecuta una única aplicación Node.js: primero se compila React/Vite en `dist/` y después Express sirve ese frontend junto con las rutas `/api/*` desde el mismo origen.
 
-Vite utiliza ahora `base: '/'`, por lo que no depende del subdirectorio de un repositorio.
+Flujo recomendado:
+
+```bash
+npm install
+npm run build
+NODE_ENV=production npm start
+```
+
+En producción, Express sirve `dist/` y mantiene `/api/*` reservado para la API. Las rutas de la aplicación que no sean archivos ni endpoints de API regresan `index.html`, permitiendo navegación SPA y recargas directas.
+
+`CORS_ORIGIN` sólo es necesario si deliberadamente se separa el frontend de la API en orígenes distintos. Para el despliegue normal de SAGC se recomienda mismo dominio/origen.
 
 ---
 
