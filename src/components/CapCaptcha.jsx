@@ -7,16 +7,94 @@ import {
 } from 'react';
 
 let capWidgetLoader;
+let capFetchDiagnosticsInstalled = false;
 
 function localCapAsset(fileName) {
   return `${import.meta.env.BASE_URL}vendor/cap/${fileName}`;
 }
 
-function loadCapWidget() {
-  window.CAP_CUSTOM_WASM_URL = localCapAsset('cap_wasm_bg.wasm');
-  window.CAP_PAKO_URL = localCapAsset('pako_inflate.min.js');
-  window.CAP_DISABLE_WIDGET_REF = true;
+function capStatusMessage(reason) {
+  switch (reason) {
+    case 'CAP_SECRET_MISSING':
+      return 'CAP no está configurado: falta CAP_SECRET en server/.env.';
+    case 'CAP_STORAGE_MISSING':
+      return 'CAP necesita la migración database/migrations/002_cap_captcha.sql en Supabase.';
+    case 'CAP_DATABASE_UNAVAILABLE':
+      return 'CAP no puede acceder a Supabase/PostgreSQL.';
+    case 'CAP_STATUS_ERROR':
+      return 'La API no pudo comprobar el estado de CAP.';
+    default:
+      return 'La verificación CAP no está lista en el backend.';
+  }
+}
 
+async function assertCapReady() {
+  let response;
+
+  try {
+    response = await fetch('/api/cap/status', {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+      cache: 'no-store',
+    });
+  } catch {
+    throw new Error(
+      'No fue posible contactar la API de SAGC. Comprueba que npm run server:dev esté ejecutándose.'
+    );
+  }
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok || !data?.cap?.ready) {
+    throw new Error(capStatusMessage(data?.cap?.reason));
+  }
+}
+
+function installCapFetchDiagnostics() {
+  if (capFetchDiagnosticsInstalled) return;
+
+  const nativeFetch = window.fetch.bind(window);
+
+  window.CAP_CUSTOM_FETCH = async (url, options = {}) => {
+    let response;
+
+    try {
+      response = await nativeFetch(url, options);
+    } catch (error) {
+      window.__SAGC_CAP_LAST_ERROR =
+        'La API de CAP no respondió. Comprueba que el backend SAGC siga activo.';
+      throw error;
+    }
+
+    if (String(url).includes('/api/cap/')) {
+      try {
+        const payload = await response.clone().json();
+        const backendError =
+          payload?.error ||
+          payload?.reason ||
+          (payload?.success === false ? 'El backend rechazó el desafío CAP.' : '');
+
+        if (!response.ok || payload?.success === false) {
+          window.__SAGC_CAP_LAST_ERROR =
+            backendError || `CAP respondió con HTTP ${response.status}.`;
+        } else {
+          window.__SAGC_CAP_LAST_ERROR = '';
+        }
+      } catch {
+        if (!response.ok) {
+          window.__SAGC_CAP_LAST_ERROR =
+            `CAP respondió con HTTP ${response.status} sin una respuesta JSON válida.`;
+        }
+      }
+    }
+
+    return response;
+  };
+
+  capFetchDiagnosticsInstalled = true;
+}
+
+function loadCapScript() {
   if (customElements.get('cap-widget')) {
     return Promise.resolve();
   }
@@ -84,6 +162,17 @@ function loadCapWidget() {
   return capWidgetLoader;
 }
 
+async function loadCapWidget() {
+  window.CAP_CUSTOM_WASM_URL = localCapAsset('cap_wasm_bg.wasm');
+  window.CAP_PAKO_URL = localCapAsset('pako_inflate.min.js');
+  window.CAP_DISABLE_WIDGET_REF = true;
+  window.CAP_DEBUG = import.meta.env.DEV;
+
+  installCapFetchDiagnostics();
+  await assertCapReady();
+  await loadCapScript();
+}
+
 const CapCaptcha = forwardRef(function CapCaptcha(
   { onToken, disabled = false },
   forwardedRef
@@ -92,6 +181,7 @@ const CapCaptcha = forwardRef(function CapCaptcha(
   const [ready, setReady] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState('');
+  const [retryKey, setRetryKey] = useState(0);
 
   useImperativeHandle(
     forwardedRef,
@@ -109,6 +199,10 @@ const CapCaptcha = forwardRef(function CapCaptcha(
   useEffect(() => {
     let active = true;
 
+    setReady(false);
+    setError('');
+    window.__SAGC_CAP_LAST_ERROR = '';
+
     loadCapWidget()
       .then(() => {
         if (active) {
@@ -116,17 +210,20 @@ const CapCaptcha = forwardRef(function CapCaptcha(
           setError('');
         }
       })
-      .catch(() => {
+      .catch((loadError) => {
         if (active) {
           setReady(false);
-          setError('No fue posible cargar la verificación CAP local.');
+          setError(
+            loadError?.message ||
+              'No fue posible cargar la verificación CAP local.'
+          );
         }
       });
 
     return () => {
       active = false;
     };
-  }, []);
+  }, [retryKey]);
 
   useEffect(() => {
     if (!ready) return undefined;
@@ -135,6 +232,7 @@ const CapCaptcha = forwardRef(function CapCaptcha(
     if (!widget) return undefined;
 
     function handleSolve(event) {
+      window.__SAGC_CAP_LAST_ERROR = '';
       setProgress(100);
       setError('');
       onToken?.(event.detail?.token || '');
@@ -147,8 +245,11 @@ const CapCaptcha = forwardRef(function CapCaptcha(
     function handleError(event) {
       onToken?.('');
       setProgress(0);
+
+      const diagnostic = String(window.__SAGC_CAP_LAST_ERROR || '').trim();
       setError(
-        event.detail?.message ||
+        diagnostic ||
+          event.detail?.message ||
           'No se pudo completar la verificación. Intenta nuevamente.'
       );
     }
@@ -199,8 +300,8 @@ const CapCaptcha = forwardRef(function CapCaptcha(
         data-cap-i18n-error-aria-label="Ocurrió un error. Intenta nuevamente"
       />
 
-      {!ready ? (
-        <span className="cap-captcha-status">Preparando verificación segura…</span>
+      {!ready && !error ? (
+        <span className="cap-captcha-status">Comprobando CAP…</span>
       ) : progress > 0 && progress < 100 ? (
         <span className="cap-captcha-status">
           Verificación {Math.round(progress)}%
@@ -208,9 +309,19 @@ const CapCaptcha = forwardRef(function CapCaptcha(
       ) : null}
 
       {error ? (
-        <span className="cap-captcha-error" role="alert">
-          {error}
-        </span>
+        <div className="cap-captcha-diagnostic" role="alert">
+          <span className="cap-captcha-error">{error}</span>
+          {!ready ? (
+            <button
+              type="button"
+              className="cap-captcha-retry"
+              onClick={() => setRetryKey((current) => current + 1)}
+              disabled={disabled}
+            >
+              Reintentar CAP
+            </button>
+          ) : null}
+        </div>
       ) : null}
     </div>
   );
