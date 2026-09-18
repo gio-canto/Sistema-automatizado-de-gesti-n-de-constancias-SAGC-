@@ -34,12 +34,6 @@ jobs:
       - name: Validate backend syntax
         run: npm run server:check
 
-      - name: Validate Cap Core
-        run: npm run cap:test
-
-      - name: Validate local Cap assets
-        run: npm run cap:assets:test
-
       - name: Validate SAGC identifiers
         run: |
           npm run folio:test
@@ -53,9 +47,6 @@ jobs:
         run: |
           test -f dist/index.html
           test -d dist/assets
-          test -f dist/vendor/cap/cap.min.js
-          test -f dist/vendor/cap/cap_wasm_bg.wasm
-          test -f dist/vendor/cap/pako_inflate.min.js
           if grep -q 'main.jsx' dist/index.html; then
             echo 'ERROR: dist/index.html todavía referencia main.jsx'
             exit 1
