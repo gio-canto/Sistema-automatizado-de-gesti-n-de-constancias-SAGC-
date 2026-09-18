@@ -399,6 +399,51 @@ input {
   color: #a33333;
 }
 
+.cap-captcha-diagnostic {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 9px;
+  border: 1px solid rgba(163, 51, 51, 0.16);
+  border-radius: 10px;
+  background: rgba(255, 244, 244, 0.72);
+  backdrop-filter: blur(12px);
+}
+
+.cap-captcha-diagnostic .cap-captcha-error {
+  padding-left: 0;
+}
+
+.cap-captcha-retry {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 999px;
+  padding: 6px 9px;
+  background: rgba(10, 132, 255, 0.12);
+  color: #0066cc;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.cap-captcha-retry:hover {
+  background: rgba(10, 132, 255, 0.18);
+}
+
+.cap-captcha-retry:active {
+  transform: scale(0.97);
+}
+
+.cap-captcha-retry:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
 
 .auth-message {
   padding: 9px 10px;
