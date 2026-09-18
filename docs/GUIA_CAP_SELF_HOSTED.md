@@ -1,14 +1,14 @@
 # SAGC — Cap CAPTCHA autoalojado
 
-SAGC reemplaza el antiguo CAPTCHA local de demostración por **Cap**, utilizando **Cap Core** dentro de la API Express.
+SAGC reemplaza el antiguo CAPTCHA local de demostración por **Cap**, usando **Cap Core** dentro de la API Express y los recursos oficiales del widget servidos desde el propio proyecto.
 
-La elección de Cap Core mantiene toda la verificación dentro de la arquitectura que SAGC ya posee:
+Arquitectura:
 
 ```text
 React / Vite
     ↓
-cap-widget
-    ↓ mismo origen
+public/vendor/cap/cap.min.js
+    ↓
 /api/cap/login/
     ↓
 Express + capjs-core
@@ -16,7 +16,7 @@ Express + capjs-core
 Supabase / PostgreSQL
 ```
 
-No existe una instancia externa de CAPTCHA, Docker separado, Redis externo ni servicio de terceros para generar o validar retos.
+No existe una instancia externa de CAPTCHA, Docker separado, Redis externo ni CDN necesario durante la ejecución.
 
 ## 1. Componentes
 
@@ -26,10 +26,29 @@ Frontend:
 src/components/CapCaptcha.jsx
 ```
 
+Recursos oficiales vendorizados:
+
+```text
+public/vendor/cap/
+├── cap.min.js
+├── cap_wasm_bg.wasm
+├── pako_inflate.min.js
+└── LICENSE
+```
+
+Versiones vendorizadas:
+
+```text
+Cap widget 0.1.57
+Cap WASM   0.0.7
+pako       2.1.0
+```
+
 Backend:
 
 ```text
 server/src/services/captcha/cap.js
+capjs-core 0.1.1
 ```
 
 Migración para bases ya creadas:
@@ -38,85 +57,67 @@ Migración para bases ya creadas:
 database/migrations/002_cap_captcha.sql
 ```
 
-El esquema de una instalación nueva ya contiene esas tablas y funciones en:
+## 2. Por qué los assets del widget están dentro del repositorio
+
+Cap permite instalar el widget mediante npm, pero SAGC necesita que todos sus recursos de ejecución salgan del propio proyecto.
+
+Por eso el navegador **no importa**:
 
 ```text
-database/schema.sql
+cap-widget
+@cap.js/wasm
+pako
 ```
 
-## 2. Dependencias
+desde `node_modules`.
 
-Frontend:
+`CapCaptcha.jsx` carga el widget oficial desde:
 
 ```text
-cap-widget 0.1.56
-@cap.js/wasm 0.0.7
-pako 2.1.0
+/vendor/cap/cap.min.js
 ```
 
-Backend:
-
-```text
-capjs-core 0.1.1
-```
-
-Las versiones están fijadas para evitar que una actualización de Cap cambie el comportamiento sin revisión.
-
-## 3. Recursos locales
-
-SAGC no carga el widget desde un CDN.
-
-Vite empaqueta:
-
-- el widget;
-- el WASM de Cap;
-- el fallback de descompresión pako.
-
-Antes de cargar el widget se configuran:
+y antes de cargarlo configura:
 
 ```js
-window.CAP_CUSTOM_WASM_URL = wasmUrl;
-window.CAP_PAKO_URL = pakoUrl;
+window.CAP_CUSTOM_WASM_URL = '/vendor/cap/cap_wasm_bg.wasm';
+window.CAP_PAKO_URL = '/vendor/cap/pako_inflate.min.js';
 ```
 
-El endpoint del widget también es del propio SAGC:
+En GitHub Pages las rutas usan automáticamente `import.meta.env.BASE_URL`, por lo que respetan el subdirectorio del repositorio.
+
+Esto elimina dependencias de CDN y también evita que Vite tenga que resolver el widget o el WASM como imports npm.
+
+## 3. Endpoint local
+
+El widget usa:
 
 ```text
 /api/cap/login/
 ```
 
-La página de ayuda del widget es local:
-
-```text
-public/cap-troubleshooting.html
-```
-
-El widget oficial conserva la atribución **Cap** incluida por el proyecto.
-
-## 4. Endpoints
-
-Cap Core utiliza dos rutas:
+y llama a:
 
 ```http
 POST /api/cap/login/challenge
 POST /api/cap/login/redeem
 ```
 
-También existe un diagnóstico no sensible:
+También existe:
 
 ```http
 GET /api/cap/status
 ```
 
-La autenticación real continúa en:
+La autenticación continúa en:
 
 ```http
 POST /api/auth/login
 ```
 
-pero ahora requiere un `capToken` válido y de un solo uso.
+pero exige un `capToken` válido.
 
-## 5. Flujo
+## 4. Flujo
 
 ```text
 usuario pulsa el widget
@@ -133,26 +134,22 @@ Express valida
         ↓
 PostgreSQL consume nonce de manera atómica
         ↓
-se almacena token de acceso temporal
+se guarda token temporal
         ↓
-Login envía usuario + contraseña + capToken
+login envía usuario + contraseña + capToken
         ↓
-PostgreSQL elimina el capToken al consumirlo
+PostgreSQL consume el token
         ↓
-Argon2id valida la contraseña
+Argon2id valida contraseña
         ↓
 sesión SAGC
 ```
 
-El token de Cap es **single-use**. Un segundo intento con el mismo token falla.
+El token de Cap es de un solo uso.
 
-## 6. Replay protection
+## 5. Replay protection
 
-Cap Core requiere almacenamiento para impedir reutilización de retos y tokens.
-
-SAGC reutiliza PostgreSQL, por lo que no añade Redis.
-
-Tablas:
+SAGC reutiliza PostgreSQL:
 
 ```text
 cap_nonces
@@ -167,109 +164,112 @@ sagc_cap_store_token(text, timestamptz)
 sagc_cap_consume_token(text)
 ```
 
-La operación de consumo se realiza dentro de PostgreSQL y no mediante una secuencia de lectura y borrado en JavaScript.
+No se utiliza Redis.
 
-## 7. Preparar una base existente
+## 6. Preparar una base existente
 
-Si el proyecto Supabase ya fue creado antes de esta integración, ejecutar una sola vez en **Supabase SQL Editor**:
+Si Supabase ya existía antes de Cap, ejecutar una sola vez:
 
 ```text
 database/migrations/002_cap_captcha.sql
 ```
 
-No ejecutar esta migración repetidamente como parte del inicio del servidor.
+En una instalación nueva, `database/schema.sql` ya contiene esas estructuras.
 
-Para una base completamente nueva basta con ejecutar el `database/schema.sql` actualizado.
+## 7. Secreto Cap
 
-## 8. Secreto de Cap
-
-Generar localmente:
+Generar:
 
 ```bash
 npm run cap:secret
 ```
 
-El comando imprime una línea similar a:
-
-```dotenv
-CAP_SECRET=...
-```
-
-Copiarla a:
+Copiar la salida a:
 
 ```text
 server/.env
 ```
 
-No pegar el secreto en React, variables `VITE_*`, GitHub Pages ni archivos versionados.
+como:
 
-## 9. Configuración local
+```dotenv
+CAP_SECRET=...
+```
 
-Después de actualizar el repositorio:
+Nunca colocarla en React, `VITE_*`, GitHub Pages o el repositorio.
+
+## 8. Dependencia backend
+
+El único paquete Cap que SAGC necesita instalar mediante npm en tiempo de desarrollo es:
+
+```text
+capjs-core 0.1.1
+```
+
+Está en `server/package.json`.
+
+Por tanto, después de obtener una versión del repositorio que incorpora Cap, ejecutar una vez:
 
 ```bash
 npm install
 ```
 
-Terminal de frontend:
+Esto instala el backend del workspace. El frontend ya recibe el widget/WASM desde `public/vendor/cap/`.
+
+## 9. Desarrollo local
+
+Terminal 1:
 
 ```bash
 npm run dev
 ```
 
-Terminal del backend:
+Terminal 2:
 
 ```bash
 npm run server:dev
 ```
 
-El widget usa el proxy de Vite hacia:
+Vite redirige `/api` a:
 
 ```text
 http://localhost:3001
 ```
 
-por lo que desde React continúa siendo una ruta same-origin `/api/...`.
-
 ## 10. Instrumentation
 
-El reto del login se genera con:
+El challenge se genera con:
 
 ```text
 instrumentation: true
+scope: sagc-login
 ```
 
-El scope utilizado por challenge y redeem es exactamente:
-
-```text
-sagc-login
-```
-
-Cambiarlo solo en una de las dos operaciones invalida todos los retos.
+El widget 0.1.57 y Cap Core 0.1.1 son compatibles con esta modalidad.
 
 ## 11. Verificación del servidor
 
-El widget por sí solo no concede acceso.
+El widget visual no concede acceso.
 
-`POST /api/auth/login` falla cuando:
+`POST /api/auth/login` falla si el token:
 
-- falta el token;
-- el token no existe;
-- el token expiró;
-- ya fue consumido;
-- la verificación Cap no pudo almacenarse correctamente.
+- falta;
+- tiene formato inválido;
+- expiró;
+- no está almacenado;
+- ya fue consumido.
 
-La verificación ocurre antes de consultar la cuenta y antes de Argon2id.
+La comprobación ocurre antes de consultar credenciales y antes de Argon2id.
 
-El rate limiting del login continúa funcionando como segunda capa.
+El limitador de intentos del login continúa funcionando como segunda capa.
 
 ## 12. Restablecimiento
 
-Cuando un login falla después de consumir el token, React ejecuta `reset()` sobre el widget. El usuario debe resolver un nuevo reto antes de volver a intentar, porque los tokens de Cap no se reutilizan.
+Después de un intento de login fallido, React llama `reset()` y obliga a resolver un challenge nuevo.
 
-## 13. Datos que nunca salen al frontend
+## 13. Datos secretos
 
-Nunca se entrega al navegador:
+Nunca llegan al navegador:
 
 ```text
 CAP_SECRET
@@ -277,24 +277,51 @@ SUPABASE_SECRET_KEY
 password_hash
 ```
 
-El navegador recibe únicamente el reto y el token temporal que necesita para completar la verificación.
+## 14. Atribución oficial
 
-## 14. GitHub Pages
+El archivo `cap.min.js` es el widget oficial de Cap y conserva su comportamiento y atribución. Su licencia Apache-2.0 está incluida en:
 
-GitHub Pages solo publica el frontend estático. No ejecuta Express.
+```text
+public/vendor/cap/LICENSE
+```
 
-Por tanto, el widget Cap real requiere que el backend SAGC esté disponible. El build de Pages puede compilar el componente, pero el CAPTCHA no puede generar retos si no existe una API desplegada detrás de `/api`.
+## 15. GitHub Pages
 
-## 15. Pruebas de aceptación
+GitHub Pages puede servir los recursos estáticos vendorizados de Cap, pero **no puede ejecutar Express**.
 
-Con una instancia local ya configurada deben probarse estos casos:
+Por tanto, el widget solo podrá completar challenge/redeem en producción cuando la API SAGC esté desplegada detrás de `/api`.
 
-1. el widget resuelve y muestra **Verificado**;
-2. login correcto con token válido;
-3. POST directo a `/api/auth/login` sin `capToken` devuelve error;
-4. token inventado devuelve error;
-5. un token válido usado una segunda vez devuelve error;
-6. contraseña incorrecta consume el token y obliga a resolver otro;
-7. reiniciar React no expone ningún secreto de Cap.
+## 16. Diagnóstico
 
-El workflow de GitHub valida instalación, sintaxis del backend y compilación Vite. Las pruebas de challenge/redeem necesitan el `CAP_SECRET` y la base Supabase de desarrollo, por lo que se realizan en el entorno local o de staging.
+Prueba del backend:
+
+```bash
+npm run cap:test
+```
+
+Estado:
+
+```text
+http://localhost:3001/api/cap/status
+```
+
+Archivos que deben responder desde Vite:
+
+```text
+http://localhost:5173/vendor/cap/cap.min.js
+http://localhost:5173/vendor/cap/cap_wasm_bg.wasm
+http://localhost:5173/vendor/cap/pako_inflate.min.js
+```
+
+Si alguno devuelve 404, el problema es de assets. Si esos tres responden y el widget falla al resolver, revisar la API `/api/cap/login/`.
+
+## 17. Pruebas de aceptación
+
+1. el widget aparece;
+2. el widget llega a **Verificado**;
+3. login válido funciona;
+4. login sin `capToken` falla;
+5. token inventado falla;
+6. el mismo token no funciona dos veces;
+7. contraseña incorrecta consume el token y obliga a resolver otro challenge;
+8. Network no muestra descargas de CDN para widget, WASM o pako.
