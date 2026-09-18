@@ -26,11 +26,8 @@
   },
   "dependencies": {
     "@blobatar/react": "latest",
-    "@cap.js/wasm": "0.0.7",
     "@vitejs/plugin-react": "latest",
     "blobatar": "latest",
-    "cap-widget": "0.1.56",
-    "pako": "2.1.0",
     "react": "latest",
     "react-dom": "latest",
     "sileo": "latest",
