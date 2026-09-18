@@ -90,7 +90,7 @@ SUPABASE_SECRET_KEY=sb_secret_...
 CAP_SECRET=...
 ```
 
-Las claves secretas nunca deben aparecer en React, GitHub Pages ni en el repositorio.
+Las claves secretas nunca deben aparecer en React, hosting estático ni en el repositorio.
 
 ## RLS
 
