@@ -24,7 +24,7 @@
     "doctor:changed": "npx react-doctor@latest --verbose --scope changed",
     "doctor:install": "npx react-doctor@latest install",
     "ui:rare:fluid-orb": "npx shadcn@latest add swamimalode07/rare-ui/fluid-orb",
-    "cap:check": "npm --workspace sagc-api run cap:check"
+    "cap:check": "node scripts/check-cap-install.mjs"
   },
   "dependencies": {
     "@blobatar/react": "latest",
