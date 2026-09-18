@@ -16,7 +16,8 @@
     "cap:test": "node src/scripts/check-cap.js",
     "chain:test": "node src/scripts/check-cadena-original.js",
     "folio:test": "node src/scripts/check-folio.js",
-    "token:test": "node src/scripts/check-token.js"
+    "token:test": "node src/scripts/check-token.js",
+    "cap:check": "node src/scripts/check-cap-runtime.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
