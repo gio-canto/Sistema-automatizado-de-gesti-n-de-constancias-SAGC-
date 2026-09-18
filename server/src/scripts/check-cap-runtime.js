@@ -12,6 +12,8 @@ if (!status.ready) {
       'Falta CAP_SECRET en server/.env. Genérelo con: npm run cap:secret',
     CAP_SUPABASE_NOT_CONFIGURED:
       'Supabase no está configurado para la API. Revise SUPABASE_URL y SUPABASE_SECRET_KEY en server/.env.',
+    SUPABASE_NOT_CONFIGURED:
+      'Faltan SUPABASE_URL o SUPABASE_SECRET_KEY en server/.env.',
     CAP_STORAGE_MISSING:
       'Falta la migración de Cap en Supabase. Ejecute database/migrations/002_cap_captcha.sql.',
     CAP_DATABASE_UNAVAILABLE:
