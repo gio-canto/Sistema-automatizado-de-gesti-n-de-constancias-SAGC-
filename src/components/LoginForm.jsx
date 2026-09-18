@@ -1,28 +1,17 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { OFFICIAL_LOGO } from '../assets/branding.js';
 import { authenticateUser } from '../services/auth.js';
 import { EyeIcon, LockIcon, MailIcon } from './AuthIcons.jsx';
-import LocalCaptcha from './LocalCaptcha.jsx';
+import CapCaptcha from './CapCaptcha.jsx';
 
 export default function LoginForm({ onAuthenticated }) {
+  const captchaRef = useRef(null);
   const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [captchaChecked, setCaptchaChecked] = useState(false);
-  const [captchaLoading, setCaptchaLoading] = useState(false);
+  const [capToken, setCapToken] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
-
-  function verifyCaptcha() {
-    if (captchaChecked || captchaLoading) return;
-
-    setCaptchaLoading(true);
-    window.setTimeout(() => {
-      setCaptchaLoading(false);
-      setCaptchaChecked(true);
-      setMessage('');
-    }, 650);
-  }
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -35,8 +24,8 @@ export default function LoginForm({ onAuthenticated }) {
       return;
     }
 
-    if (!captchaChecked) {
-      setMessage('Complete la verificación CAPTCHA para continuar.');
+    if (!capToken) {
+      setMessage('Complete la verificación CAP para continuar.');
       return;
     }
 
@@ -46,11 +35,13 @@ export default function LoginForm({ onAuthenticated }) {
       const result = await authenticateUser({
         user: normalizedUser,
         password,
+        capToken,
       });
 
       if (!result.ok) {
         setPassword('');
-        setCaptchaChecked(false);
+        setCapToken('');
+        captchaRef.current?.reset();
         setMessage(result.error);
         return;
       }
@@ -137,6 +128,14 @@ export default function LoginForm({ onAuthenticated }) {
                 </div>
               </div>
 
+              <div className="captcha-container">
+                <CapCaptcha
+                  ref={captchaRef}
+                  onToken={setCapToken}
+                  disabled={submitting}
+                />
+              </div>
+
               <button
                 className="btn-cocytieg btn-cocytieg--primario btn-login"
                 type="submit"
@@ -144,14 +143,6 @@ export default function LoginForm({ onAuthenticated }) {
               >
                 {submitting ? 'Verificando...' : 'Iniciar sesión'}
               </button>
-
-              <div className="captcha-container">
-                <LocalCaptcha
-                  checked={captchaChecked}
-                  loading={captchaLoading}
-                  onChange={verifyCaptcha}
-                />
-              </div>
 
               {message && (
                 <div className="auth-message" role="alert">
