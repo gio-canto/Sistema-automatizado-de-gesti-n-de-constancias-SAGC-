@@ -42,13 +42,6 @@ import {
   updateAdminEvent,
   updateAdminUser,
 } from './services/admin/operations.js';
-import {
-  consumeLoginCapToken,
-  createLoginCapChallenge,
-  getCapStatus,
-  redeemLoginCapChallenge,
-} from './services/captcha/cap.js';
-
 const app = express();
 const port = Number(process.env.PORT || 3001);
 
@@ -109,78 +102,15 @@ app.get('/api/health/db', async (_req, res) => {
   }
 });
 
-app.get('/api/cap/status', async (_req, res) => {
-  try {
-    const cap = await getCapStatus();
-    res.status(cap.ready ? 200 : 503).json({ ok: cap.ready, cap });
-  } catch (error) {
-    console.error('No fue posible comprobar el estado de CAP:', error);
-    res.status(503).json({
-      ok: false,
-      cap: {
-        configured: false,
-        storageReady: false,
-        ready: false,
-        mode: 'core',
-        scope: 'sagc-login',
-        reason: 'CAP_STATUS_ERROR',
-      },
-    });
-  }
-});
-
-app.post('/api/cap/login/challenge', async (_req, res) => {
-  try {
-    const challenge = await createLoginCapChallenge();
-    return res.json(challenge);
-  } catch (error) {
-    console.error('No fue posible generar el desafío CAP:', error);
-    return res.status(503).json({
-      error: 'La verificación humana no está disponible temporalmente.',
-    });
-  }
-});
-
-app.post('/api/cap/login/redeem', async (req, res) => {
-  try {
-    const result = await redeemLoginCapChallenge(req.body);
-    return res.json(result);
-  } catch (error) {
-    console.error('No fue posible validar el desafío CAP:', error);
-    return res.status(503).json({
-      success: false,
-      error: 'La verificación humana no está disponible temporalmente.',
-    });
-  }
-});
-
 app.post('/api/auth/login', loginThrottle, async (req, res) => {
   const user = String(req.body?.user || '').trim().toLowerCase();
   const password = String(req.body?.password || '');
-  const capToken = String(req.body?.capToken || '');
 
   if (!user || !password) {
     return res.status(400).json({ ok: false, error: 'Ingrese su usuario y contraseña.' });
   }
 
-  if (!capToken) {
-    return res.status(400).json({
-      ok: false,
-      error: 'Complete la verificación CAP para continuar.',
-      captchaRequired: true,
-    });
-  }
-
   try {
-    const humanVerified = await consumeLoginCapToken(capToken);
-    if (!humanVerified) {
-      return res.status(400).json({
-        ok: false,
-        error: 'La verificación CAP expiró o ya fue utilizada. Verifique nuevamente.',
-        captchaRequired: true,
-      });
-    }
-
     const client = requireSupabase();
     const { data: account, error } = await client
       .from('usuarios')
