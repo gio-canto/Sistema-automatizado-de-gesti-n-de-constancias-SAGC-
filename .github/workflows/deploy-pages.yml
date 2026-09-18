@@ -34,6 +34,9 @@ jobs:
       - name: Validate backend syntax
         run: npm run server:check
 
+      - name: Validate Cap Core
+        run: npm run cap:test
+
       - name: Validate SAGC identifiers
         run: |
           npm run folio:test
