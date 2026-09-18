@@ -9,6 +9,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "start": "npm --workspace sagc-api run start",
+    "check": "npm run server:check && npm run build",
     "preview": "vite preview",
     "server:dev": "npm --workspace sagc-api run dev",
     "server:check": "npm --workspace sagc-api run check",
