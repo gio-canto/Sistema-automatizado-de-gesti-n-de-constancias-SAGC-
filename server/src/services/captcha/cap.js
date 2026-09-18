@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { generateChallenge, validateChallenge } from 'capjs-core';
-import { requireSupabase } from '../../config/supabase.js';
+import { requireSupabase, supabaseConfigured } from '../../config/supabase.js';
 
 const LOGIN_SCOPE = 'sagc-login';
 const LOGIN_TOKEN_TTL_MS = 5 * 60 * 1000;
@@ -133,6 +133,11 @@ export async function getCapStatus() {
     return status;
   }
 
+  if (!supabaseConfigured) {
+    status.reason = 'CAP_SUPABASE_NOT_CONFIGURED';
+    return status;
+  }
+
   try {
     const client = requireSupabase();
 
@@ -147,14 +152,19 @@ export async function getCapStatus() {
 
     if (noncesCheck.error || tokensCheck.error) {
       status.reason = 'CAP_STORAGE_MISSING';
+      status.detail =
+        noncesCheck.error?.message ||
+        tokensCheck.error?.message ||
+        null;
       return status;
     }
 
     status.storageReady = true;
     status.ready = true;
     return status;
-  } catch {
+  } catch (error) {
     status.reason = 'CAP_DATABASE_UNAVAILABLE';
+    status.detail = error?.message || null;
     return status;
   }
 }
