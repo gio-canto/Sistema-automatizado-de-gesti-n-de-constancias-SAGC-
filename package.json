@@ -15,6 +15,7 @@
     "db:check": "npm --workspace sagc-api run db:check",
     "db:bootstrap-admin": "npm --workspace sagc-api run db:bootstrap-admin",
     "cap:secret": "npm --workspace sagc-api run cap:secret",
+    "cap:test": "npm --workspace sagc-api run cap:test",
     "folio:test": "npm --workspace sagc-api run folio:test",
     "chain:test": "npm --workspace sagc-api run chain:test",
     "token:test": "npm --workspace sagc-api run token:test",
