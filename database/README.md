@@ -21,6 +21,8 @@ database/
 ├── 002_seed_catalogos.sql
 ├── 004_smoke_test.sql
 ├── migrations/
+│   ├── 001_token_uuid_v4.sql
+│   ├── 002_cap_captcha.sql
 │   └── README.md
 └── README.md
 ```
@@ -30,10 +32,9 @@ database/
 En un proyecto nuevo de Supabase:
 
 1. abrir **SQL Editor**;
-2. crear una consulta nueva;
-3. copiar y ejecutar `database/schema.sql`;
-4. ejecutar `database/002_seed_catalogos.sql`;
-5. ejecutar `database/004_smoke_test.sql`.
+2. ejecutar `database/schema.sql`;
+3. ejecutar `database/002_seed_catalogos.sql`;
+4. ejecutar `database/004_smoke_test.sql`.
 
 El esquema crea:
 
@@ -47,6 +48,8 @@ plantillas
 contador_folios
 constancias
 auditoria
+cap_nonces
+cap_tokens
 ```
 
 También crea estas funciones PostgreSQL:
@@ -54,6 +57,15 @@ También crea estas funciones PostgreSQL:
 ```text
 sagc_healthcheck()
 asignar_siguiente_folio(date)
+sagc_cap_consume_nonce(text, timestamptz)
+sagc_cap_store_token(text, timestamptz)
+sagc_cap_consume_token(text)
+```
+
+Si la base ya existía antes de Cap, ejecutar únicamente la migración adicional:
+
+```text
+database/migrations/002_cap_captcha.sql
 ```
 
 ## Acceso desde el backend
@@ -75,17 +87,18 @@ El backend utiliza:
 ```dotenv
 SUPABASE_URL=https://TU_PROJECT_REF.supabase.co
 SUPABASE_SECRET_KEY=sb_secret_...
+CAP_SECRET=...
 ```
 
-La clave secreta nunca debe aparecer en React, GitHub Pages ni en el repositorio.
+Las claves secretas nunca deben aparecer en React, GitHub Pages ni en el repositorio.
 
 ## RLS
 
 Todas las tablas del esquema base tienen **Row Level Security habilitado**.
 
-En esta etapa no se concede acceso directo a `anon` ni `authenticated`. La API Express realiza la autorización y usa la clave secreta del proyecto para las operaciones administrativas.
+En esta etapa no se concede acceso directo a `anon` ni `authenticated`. La API Express realiza autorización y utiliza `service_role` desde infraestructura del backend.
 
-Si más adelante se decide conectar una parte del frontend directamente con Supabase, deberán diseñarse políticas RLS específicas antes de conceder permisos.
+Las tablas internas de Cap tampoco son accesibles directamente desde el navegador.
 
 ## Folio Único SAGC V1
 
@@ -95,25 +108,13 @@ Formato:
 AAAA-X-XXXX
 ```
 
-El contador se almacena en:
-
-```text
-contador_folios
-├── anio
-├── serie
-├── ultimo_valor
-└── fecha_actualizacion
-```
-
-La función:
+El contador se almacena en `contador_folios`. La función:
 
 ```text
 public.asignar_siguiente_folio(date)
 ```
 
-realiza la reserva del siguiente folio dentro de PostgreSQL y bloquea la fila anual con `FOR UPDATE` para impedir que dos solicitudes reciban el mismo número.
-
-El backend la invoca mediante `supabase.rpc()`.
+reserva el siguiente folio en PostgreSQL y bloquea la fila anual con `FOR UPDATE` para impedir asignaciones concurrentes duplicadas.
 
 ## Token Único SAGC V1
 
@@ -136,42 +137,42 @@ PostgreSQL utiliza:
 token_unico uuid not null unique
 ```
 
-y el esquema añade una restricción que acepta únicamente UUID de versión 4 y variante RFC.
-
-El backend genera el valor con `crypto.randomUUID()`.
-
----
+El backend genera el UUID con `crypto.randomUUID()`.
 
 ## Cadena Original
 
-Formato actual:
+Formato:
 
 ```text
 FOLIO|NOMBRE_NORMALIZADO|FECHA|TIPO_DOCUMENTO|NOMBRE_EVENTO_NORMALIZADO|TOKEN_UNICO
 ```
 
-Se almacena en:
+Se almacena en `constancias.cadena_validacion`.
+
+## Login y Cap
+
+SAGC conserva autenticación propia:
 
 ```text
-constancias.cadena_validacion
+usuarios.password_hash
+└── Argon2id
 ```
 
-El evento procede de `eventos.nombre`.
+Antes de procesar un login real, Express exige un token válido de **Cap Core**.
 
-## Login
+Cap utiliza PostgreSQL para:
 
-El cambio a Supabase/PostgreSQL no cambia todavía el modelo de autenticación.
+- impedir replay de challenges;
+- almacenar temporalmente tokens redimidos;
+- consumir cada token una sola vez.
 
-SAGC conserva:
+Guía:
 
 ```text
-usuarios
-└── password_hash Argon2id
+docs/GUIA_CAP_SELF_HOSTED.md
 ```
 
-El login ocurre en Express y consulta `usuarios` mediante Supabase.
-
-Supabase Auth podrá evaluarse posteriormente como un cambio separado si el Consejo lo solicita.
+Supabase Auth continúa fuera del diseño actual.
 
 ## Migraciones futuras
 
@@ -181,4 +182,4 @@ Todo cambio posterior al esquema base deberá agregarse en:
 database/migrations/
 ```
 
-y deberá utilizar exclusivamente sintaxis PostgreSQL.
+y deberá utilizar exclusivamente sintaxis PostgreSQL compatible con Supabase.
