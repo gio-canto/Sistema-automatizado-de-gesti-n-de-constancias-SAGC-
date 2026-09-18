@@ -14,17 +14,13 @@
     "server:check": "npm --workspace sagc-api run check",
     "db:check": "npm --workspace sagc-api run db:check",
     "db:bootstrap-admin": "npm --workspace sagc-api run db:bootstrap-admin",
-    "cap:secret": "npm --workspace sagc-api run cap:secret",
-    "cap:test": "npm --workspace sagc-api run cap:test",
-    "cap:assets:test": "node scripts/check-cap-assets.mjs",
     "folio:test": "npm --workspace sagc-api run folio:test",
     "chain:test": "npm --workspace sagc-api run chain:test",
     "token:test": "npm --workspace sagc-api run token:test",
     "doctor": "npx react-doctor@latest",
     "doctor:changed": "npx react-doctor@latest --verbose --scope changed",
     "doctor:install": "npx react-doctor@latest install",
-    "ui:rare:fluid-orb": "npx shadcn@latest add swamimalode07/rare-ui/fluid-orb",
-    "cap:check": "node scripts/check-cap-install.mjs"
+    "ui:rare:fluid-orb": "npx shadcn@latest add swamimalode07/rare-ui/fluid-orb"
   },
   "dependencies": {
     "@blobatar/react": "latest",
