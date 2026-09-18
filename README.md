@@ -12,12 +12,6 @@
   <a href="https://github.com/gio-canto/Sistema-automatizado-de-gesti-n-de-constancias-SAGC-">
     <img src="https://img.shields.io/badge/GitHub-Repositorio-181717?style=for-the-badge&logo=github" alt="Repositorio" />
   </a>
-  <a href="https://gio-canto.github.io/Sistema-automatizado-de-gesti-n-de-constancias-SAGC-/">
-    <img src="https://img.shields.io/badge/GitHub_Pages-Prototipo-1877F2?style=for-the-badge&logo=githubpages&logoColor=white" alt="Prototipo" />
-  </a>
-  <a href="https://github.com/gio-canto/Sistema-automatizado-de-gesti-n-de-constancias-SAGC-/actions">
-    <img src="https://img.shields.io/badge/Actions-Despliegues-2088FF?style=for-the-badge&logo=githubactions&logoColor=white" alt="Actions" />
-  </a>
 
   <br /><br />
 
@@ -896,7 +890,7 @@ respaldos con datos personales
 - React + Vite + CSS;
 - login visual y acceso de prototipo `demo/demo`;
 - carrusel de imágenes y estilo Liquid Glass;
-- workflow de GitHub Pages;
+- frontend preparado para desplegarse junto con la API Express;
 - API Node.js/Express;
 - cliente backend `@supabase/supabase-js`;
 - esquema oficial PostgreSQL para Supabase;
@@ -940,7 +934,7 @@ respaldos con datos personales
 - [x] React + Vite
 - [x] Login
 - [x] Identidad visual
-- [x] GitHub Pages
+- [x] Frontend Vite sin dependencia de GitHub Pages
 - [x] README de alcance
 - [x] Diagramas visuales del proyecto
 
@@ -1353,13 +1347,13 @@ El lanzador:
 4. abre el navegador;
 5. comprueba que el backend responda.
 
-Si Supabase todavía no está configurado, el acceso estático `demo/demo` continúa disponible para el prototipo.
+Si Supabase todavía no está configurado, el acceso `demo/demo` continúa disponible únicamente como modo de prototipo durante desarrollo.
 
 ---
 
 ## 20.9 Accesos durante desarrollo
 
-Prototipo estático:
+Prototipo de desarrollo:
 
 ```text
 Usuario: demo
@@ -1380,11 +1374,21 @@ Supabase
 public.usuarios
 ```
 
-GitHub Pages no ejecuta Express, por lo que el acceso real a Supabase requiere desplegar también el backend.
+El frontend y la API Express deben desplegarse en una infraestructura que ejecute Node.js y permita servir o enrutar `/api` hacia el backend.
 
 ---
 
-## 20.10 Seguridad de Supabase
+## 20.10 Despliegue
+
+SAGC ya no utiliza GitHub Pages.
+
+El despliegue objetivo debe ejecutar el frontend y el backend Express dentro de la misma infraestructura o detrás del mismo dominio, manteniendo las rutas `/api/*` disponibles para autenticación, CAPTCHA y demás funciones server-side.
+
+Vite utiliza ahora `base: '/'`, por lo que no depende del subdirectorio de un repositorio.
+
+---
+
+## 20.11 Seguridad de Supabase
 
 El esquema base habilita RLS y no concede acceso directo a las tablas a `anon` o `authenticated` durante esta etapa.
 
@@ -1408,7 +1412,7 @@ respaldos con datos personales
 
 ---
 
-## 20.11 Flujo diario de Git
+## 20.12 Flujo diario de Git
 
 ```bash
 git checkout main
@@ -1440,7 +1444,7 @@ Crear Pull Request y revisar código, SQL PostgreSQL, secretos, build y funciona
 
 ---
 
-## 20.12 Base de datos y migraciones
+## 20.13 Base de datos y migraciones
 
 Fuente de verdad:
 
