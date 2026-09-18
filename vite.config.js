@@ -1,12 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-export default defineConfig(({ command }) => ({
+export default defineConfig({
   plugins: [react()],
-  base:
-    command === 'build'
-      ? '/Sistema-automatizado-de-gesti-n-de-constancias-SAGC-/'
-      : '/',
+  base: '/',
   server: {
     proxy: {
       '/api': {
@@ -15,4 +12,4 @@ export default defineConfig(({ command }) => ({
       },
     },
   },
-}));
+});
