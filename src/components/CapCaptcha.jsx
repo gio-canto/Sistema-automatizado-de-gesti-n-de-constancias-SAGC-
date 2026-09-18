@@ -17,6 +17,8 @@ function capStatusMessage(reason) {
   switch (reason) {
     case 'CAP_SECRET_MISSING':
       return 'CAP no está configurado: falta CAP_SECRET en server/.env.';
+    case 'SUPABASE_NOT_CONFIGURED':
+      return 'Supabase no está configurado: faltan SUPABASE_URL o SUPABASE_SECRET_KEY en server/.env.';
     case 'CAP_STORAGE_MISSING':
       return 'CAP necesita la migración database/migrations/002_cap_captcha.sql en Supabase.';
     case 'CAP_DATABASE_UNAVAILABLE':
