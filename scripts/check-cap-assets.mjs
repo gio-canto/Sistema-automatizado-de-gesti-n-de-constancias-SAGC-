@@ -33,6 +33,12 @@ if (
   throw new Error('cap_wasm_bg.wasm no contiene la cabecera WebAssembly válida.');
 }
 
+if (wasm.length !== 36032) {
+  throw new Error(
+    `cap_wasm_bg.wasm no corresponde exactamente a @cap.js/wasm 0.0.7 (36032 bytes). Recibidos: ${wasm.length}.`
+  );
+}
+
 const pako = await readFile(files.pako, 'utf8');
 if (!pako.includes('pako 2.1.0')) {
   throw new Error('El fallback pako local no corresponde a la versión esperada.');
